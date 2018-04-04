@@ -964,79 +964,127 @@ Definition vert_safe_above
     end.
 
 
-Theorem safely_separated_trajectory_interval_above':
+Theorem safely_separated_trajectory_interval_above:
   forall aa1 ab1 v1 vt1 z1 (* 1 above *)
          aa2 ab2 v2 vt2 z2 (* 2 below *)
          vmd tb te,
-    vt1 <= v1 -> vt2 <= v2 ->
     vert_safe_above aa1 ab1 v1 vt1 z1 aa2 ab2 v2 vt2 z2 tb te = Some vmd ->
     (forall t, tb <= t <= te ->
                vmd <= K aa1 ab1 v1 vt1 z1 t - K aa2 ab2 v2 vt2 z2 t).
 Proof.
   intros aa1 ab1 v1 vt1 z1 aa2 ab2 v2 vt2 z2 vmd tb te.
-  intros vt1lev1 vt2lev2.
   intros vsa t tbletlete.
-  set (t1 := (vt1 - v1)/aa1) in *.
-  set (t2 := (vt2 - v2)/aa2) in *.
-  generalize (Rle_dec t t1) as trelt1.
-  generalize (Rle_dec t t2) as trelt2.
+
+  generalize (Rle_dec vt1 v1) as vt1relv1.
+  generalize (Rle_dec vt2 v2) as vt2relv2.
   intros.
-  inversion_clear trelt1 as [tlet1 | tgtt1].
-  inversion_clear trelt2 as [tlet2 | tgtt2].
-  inversion tbletlete as [tblet tlete].
-  assert (t <= (Rmin te (Rmin t1 t2))) as QQboundary.
-  unfold Rmin.
-  destruct (Rle_dec t1 t2).
-  destruct (Rle_dec te t1).
-  assumption. assumption.
-  destruct (Rle_dec te t2).
-  assumption. assumption.
+  inversion_clear vt1relv1 as [vt1lev1 | vt1lev1];
+    inversion_clear vt2relv2 as [vt2lev2 | vt2lev2];
+    [
+      set (t1 := (vt1 - v1)/aa1) in *; set (t2 := (vt2 - v2)/aa2) in * |
+      set (t1 := (vt1 - v1)/aa1) in *; set (t2 := (vt2 - v2)/ab2) in * |
+      set (t1 := (vt1 - v1)/ab1) in *; set (t2 := (vt2 - v2)/aa2) in * |
+      set (t1 := (vt1 - v1)/ab1) in *; set (t2 := (vt2 - v2)/ab2) in *
+    ]; 
+  
+  (generalize (Rle_dec t t1) as trelt1;
+  generalize (Rle_dec t t2) as trelt2;
+  intros;
+  
+  inversion_clear trelt1 as [tlet1 | tgtt1]; [
 
-  generalize (Rlistmin_min_element _ 0 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
 
-  unfold K.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := aa1 / 2; b := v1; c := z1 |} t
-   else
-    J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := aa2 / 2; b := v2; c := z2 |} t
-   else
-    J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
+  inversion_clear trelt2 as [tlet2 | tgtt2]; [
 
-  rle_decide t t2.
-  rle_decide t t1.
-  change (interv_vert_safe {| a := aa1 / 2; b := v1; c := z1 |}
+  inversion tbletlete as [tblet tlete];
+  assert (t <= (Rmin te (Rmin t1 t2))) as QQboundary;[
+  unfold Rmin;
+  destruct (Rle_dec t1 t2); [
+    destruct (Rle_dec te t1); assumption |
+    destruct (Rle_dec te t2); assumption] |idtac];
+ 
+  generalize (Rlistmin_min_element _ 0 _ vsa (eq_refl true)) as cadist;
+  intros; unfold nth in cadist; simpl;
+  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd]; [
+
+  unfold K;
+  rle_decide vt1 v1;
+  rle_decide vt2 v2;
+  (change (vmd <=
+           (if Rle_dec t t1
+            then J {| a := aa1 / 2; b := v1; c := z1 |} t
+            else
+              J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
+           (if Rle_dec t t2
+            then J {| a := aa2 / 2; b := v2; c := z2 |} t
+            else
+              J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)) ||
+   change (vmd <=
+           (if Rle_dec t t1
+            then J {| a := aa1 / 2; b := v1; c := z1 |} t
+            else
+              J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
+           (if Rle_dec t t2
+            then J {| a := ab2 / 2; b := v2; c := z2 |} t
+            else
+              J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)) ||
+   change (vmd <=
+           (if Rle_dec t t1
+            then J {| a := ab1 / 2; b := v1; c := z1 |} t
+            else
+              J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
+           (if Rle_dec t t2
+            then J {| a := aa2 / 2; b := v2; c := z2 |} t
+            else
+              J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)) ||
+   change (vmd <=
+           (if Rle_dec t t1
+            then J {| a := ab1 / 2; b := v1; c := z1 |} t
+            else
+              J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
+           (if Rle_dec t t2
+            then J {| a := ab2 / 2; b := v2; c := z2 |} t
+            else
+              J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t))
+  );
+
+  rle_decide t t2;
+  rle_decide t t1;
+  (change (interv_vert_safe {| a := aa1 / 2; b := v1; c := z1 |}
           {| a := aa2 / 2; b := v2; c := z2 |} tb
-          (Rmin te (Rmin t1 t2)) = 
-          Some v') in ivs.
+          (Rmin te (Rmin t1 t2)) =  Some v') in ivs ||
+   change (interv_vert_safe {| a := aa1 / 2; b := v1; c := z1 |}
+          {| a := ab2 / 2; b := v2; c := z2 |} tb
+          (Rmin te (Rmin t1 t2)) = Some v') in ivs ||
+  change (interv_vert_safe {| a := ab1 / 2; b := v1; c := z1 |}
+          {| a := aa2 / 2; b := v2; c := z2 |} tb
+          (Rmin te (Rmin t1 t2)) =  Some v') in ivs ||
+   change (interv_vert_safe {| a := ab1 / 2; b := v1; c := z1 |}
+          {| a := ab2 / 2; b := v2; c := z2 |} tb
+          (Rmin te (Rmin t1 t2)) = Some v') in ivs);
 
-  eapply Rle_trans. apply vmdlev'.
-  eapply safely_separated_second_order_polynomial_interval.
-  split. eapply tblet. eapply QQboundary.
-  assumption.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  exfalso.
-  change (tb > Rmin te (Rmin t1 t2)) in tbgt.
-  assert (tb <= Rmin te (Rmin t1 t2)). fourier.
-  eapply Rgt_not_le. eapply tbgt. assumption.
-
+  eapply Rle_trans; [
+  apply vmdlev'|
+  eapply safely_separated_second_order_polynomial_interval; [
+  split; [eapply tblet | eapply QQboundary] |
+  assumption]]
+  |
+  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt; intros;
+  rle_decide vt1 v1;
+  rle_decide vt2 v2;
+  exfalso;
+  change (tb > Rmin te (Rmin t1 t2)) in tbgt;
+  assert (tb <= Rmin te (Rmin t1 t2)); [
+    fourier |
+    eapply Rgt_not_le ; [ eapply tbgt | assumption]]]
+  |
 
   (******************)
   generalize (Rlistmin_min_element _ 2 _ vsa (eq_refl true)) as cadist;
-  intros. unfold nth in cadist; simpl;
+  intros; unfold nth in cadist; simpl;
   generalize (Rnot_le_lt _ _ tgtt2) as t2ltt; intros;
 
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
+  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd]; [
 
   unfold K;
   rle_decide vt2 v2;
@@ -1105,7 +1153,8 @@ Proof.
   generalize (safely_separated_second_order_polynomial_interval _ _ _ _ _ _ trange ivs);
   intros; eapply Rle_trans; [apply vmdlev' | assumption]
   |
-  intros; exfalso; apply n; assumption].
+  intros; exfalso; apply n; assumption]
+  |
 
   rle_decide vt2 v2;
   rle_decide vt1 v1;
@@ -1140,7 +1189,8 @@ Proof.
   apply Rgt_lt in tbgt; (* swap assumption *)
   destruct (Rle_dec tb t2); destruct (Rle_dec te t1); fourier
   |
-  exfalso; apply n; assumption].
+  exfalso; apply n; assumption]]]
+  |
   (******************)
 
   inversion_clear trelt2 as [tlet2 | tnlet2]; [
@@ -1336,917 +1386,9 @@ Proof.
     [destruct (Rle_dec tb t2); fourier |
      destruct (Rle_dec tb t1); fourier] | idtac];
 
-  eapply Rgt_not_le; [eapply tbgt | assumption]]].
+  eapply Rgt_not_le; [eapply tbgt | assumption]]]]).
 Qed.
 
-Theorem safely_separated_trajectory_interval_above'':
-  forall aa1 ab1 v1 vt1 z1 (* 1 above *)
-         aa2 ab2 v2 vt2 z2 (* 2 below *)
-         vmd tb te,
-    vt1 <= v1 -> ~ vt2 <= v2 ->
-    vert_safe_above aa1 ab1 v1 vt1 z1 aa2 ab2 v2 vt2 z2 tb te = Some vmd ->
-    (forall t, tb <= t <= te ->
-               vmd <= K aa1 ab1 v1 vt1 z1 t - K aa2 ab2 v2 vt2 z2 t).
-Proof.
-  intros aa1 ab1 v1 vt1 z1 aa2 ab2 v2 vt2 z2 vmd tb te.
-  intros vt1lev1 vt2nlev2.
-  intros vsa t tbletlete.
-  set (t1 := (vt1 - v1)/aa1) in *.
-  set (t2 := (vt2 - v2)/ab2) in *.
-  generalize (Rle_dec t t1) as trelt1.
-  generalize (Rle_dec t t2) as trelt2.
-  intros.
-  inversion_clear trelt1 as [tlet1 | tgtt1].
-  inversion_clear trelt2 as [tlet2 | tgtt2].
-  inversion tbletlete as [tblet tlete].
-  assert (t <= (Rmin te (Rmin t1 t2))) as QQboundary.
-  unfold Rmin.
-  destruct (Rle_dec t1 t2).
-  destruct (Rle_dec te t1).
-  assumption. assumption.
-  destruct (Rle_dec te t2).
-  assumption. assumption.
-
-  generalize (Rlistmin_min_element _ 0 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-  unfold K.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := aa1 / 2; b := v1; c := z1 |} t
-   else
-    J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := ab2 / 2; b := v2; c := z2 |} t
-   else
-    J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  rle_decide t t2.
-  rle_decide t t1.
-  change (interv_vert_safe {| a := aa1 / 2; b := v1; c := z1 |}
-          {| a := ab2 / 2; b := v2; c := z2 |} tb
-          (Rmin te (Rmin t1 t2)) = 
-          Some v') in ivs.
-
-  eapply Rle_trans. apply vmdlev'.
-  eapply safely_separated_second_order_polynomial_interval.
-  split. eapply tblet. eapply QQboundary.
-  assumption.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  exfalso.
-  change (tb > Rmin te (Rmin t1 t2)) in tbgt.
-  assert (tb <= Rmin te (Rmin t1 t2)). fourier.
-  eapply Rgt_not_le. eapply tbgt. assumption.
-
-
-  (******************)
-  generalize (Rlistmin_min_element _ 2 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-  generalize (Rnot_le_lt _ _ tgtt2) as t2ltt. intros.
-
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-
-  unfold K.
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-  assert (t2 < t1) as t2ltt1.
-  eapply Rlt_le_trans. eapply t2ltt. assumption.
-  
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := aa1 / 2; b := v1; c := z1 |} t
-   else J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := ab2 / 2; b := v2; c := z2 |} t
-   else J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  change ((if Rlt_dec t2 t1
-         then
-          interv_vert_safe {| a := aa1 / 2; b := v1; c := z1 |}
-            {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |}
-            (Rmax tb (Rmin t1 t2))
-            (Rmin te (Rmax t1 t2))
-         else None) = Some v') in ivs.
-  rle_decide t t1.
-  rle_decide t t2.
-  case_eq (Rlt_dec t2 t1).
-  intros.
-  rewrite H in *. clear r H.
-
-  assert (~ t1 <= t2) as t1nget2.
-  apply Rlt_not_le. assumption.
-  
-  assert ((Rmax tb (Rmin t1 t2)) <= t <= (Rmin te (Rmax t1 t2))) as trange.
-  unfold Rmax, Rmin. split.
-  rle_decide t1 t2.
-  destruct (Rle_dec tb t2).
-  left.
-  inversion_clear tbletlete as [tblet tlete].
-  assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  
-  rle_decide t1 t2.
-  destruct (Rle_dec te t1). assumption. assumption.
-
-  generalize (safely_separated_second_order_polynomial_interval _ _ _ _ _ _ trange ivs).
-  intros.
-  eapply Rle_trans.
-  apply vmdlev'. assumption.
-
-  intros. exfalso. apply n. assumption.
-
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-    change ((if Rlt_dec t2 t1
-           then
-            interv_vert_safe {| a := aa1 / 2; b := v1; c := z1 |}
-              {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |}
-              (Rmax tb (Rmin t1 t2))
-              (Rmin te (Rmax t1 t2))
-           else None) = None) in novmd.
-
-  assert (t2 < t1) as t2ltt1.
-  eapply Rlt_le_trans. eapply t2ltt. assumption.
-  
-  case_eq (Rlt_dec t2 t1).
-  intros.
-
-  rewrite H in *. clear r H.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros. exfalso.
-  unfold Rmin,Rmax in tbgt.
-  assert (~ t1 <= t2) as t1nlet2. apply Rlt_not_le. assumption.
-  rle_decide t1 t2. clear t1nlet2. clear tgtt2 novmd.
-  inversion_clear tbletlete as [tblet tlete].
-  apply Rgt_lt in tbgt. (* swap assumption *)
-  destruct (Rle_dec tb t2); destruct (Rle_dec te t1).
-  fourier. fourier. fourier. fourier.
-  intros. exfalso. apply n. assumption.
-  (******************)
-
-  inversion_clear trelt2 as [tlet2 | tnlet2].
-
-  generalize (Rlistmin_min_element _ 3 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-
-  unfold K.
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-  assert (t1 < t2) as t1ltt2.
-  eapply Rlt_le_trans.
-  apply Rnot_le_lt. apply tgtt1. assumption.
-  
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := aa1 / 2; b := v1; c := z1 |} t
-   else J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := ab2 / 2; b := v2; c := z2 |} t
-   else J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  change ((if Rlt_dec t1 t2
-         then
-          interv_vert_safe {| a := 0; b := vt1; c := z1 - (vt1 - v1) / aa1 * (vt1 - v1) / 2 |}
-            {| a := ab2 / 2; b := v2; c := z2 |}
-            (Rmax tb (Rmin t1 t2)) (Rmin te (Rmax t1 t2)) else None) = Some v') in ivs.
-  rle_decide t t1.
-  rle_decide t t2.
-  case_eq (Rlt_dec t1 t2).
-  intros.
-  rewrite H in *. clear r H.
-
-(*  assert (~ t2 <= t1) as t2nget1. 
-  apply Rlt_not_le. assumption. *)
-
-  assert (t1 <= t2) as t1get2. left. assumption.
-  
-  assert ((Rmax tb (Rmin t1 t2)) <= t <= (Rmin te (Rmax t1 t2))) as trange.
-  unfold Rmax, Rmin. split.
-  rle_decide t1 t2.
-  destruct (Rle_dec tb t1).
-  left.
-  apply Rnot_le_lt in tgtt1. assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  
-  rle_decide t1 t2.
-  destruct (Rle_dec te t2). assumption. assumption.
-
-  generalize (safely_separated_second_order_polynomial_interval _ _ _ _ _ _ trange ivs).
-  intros.
-  eapply Rle_trans.
-  apply vmdlev'. assumption.
-
-  intros. exfalso. apply n. assumption.
-
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-  change ((if Rlt_dec t1 t2
-           then
-            interv_vert_safe {| a := 0; b := vt1; c := z1 - (vt1 - v1) / aa1 * (vt1 - v1) / 2 |}
-              {| a := ab2 / 2; b := v2; c := z2 |}
-              (Rmax tb (Rmin t1 t2)) (Rmin te (Rmax t1 t2))
-           else None) = None) in novmd.
-
-  assert (t1 < t2) as t1ltt2.
-  apply Rnot_le_lt in tgtt1.
-  eapply Rlt_le_trans. eapply tgtt1. assumption.
-  
-  case_eq (Rlt_dec t1 t2).
-  intros.
-
-  rewrite H in *. clear r H.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros. exfalso.
-  unfold Rmin,Rmax in tbgt.
-  assert (t1 <= t2) as t1let2. left. assumption.
-  rle_decide t1 t2. clear t1let2. clear novmd.
-  inversion_clear tbletlete as [tblet tlete].
-  apply Rnot_le_lt in tgtt1. (* swap assumption *)
-  destruct (Rle_dec tb t1); destruct (Rle_dec te t2).
-  fourier. fourier. fourier. fourier.
-  intros. exfalso. apply n. assumption.
-  (******************)
-
-  generalize (Rlistmin_min_element _ 1 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-  unfold K.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := aa1 / 2; b := v1; c := z1 |} t
-   else
-    J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := ab2 / 2; b := v2; c := z2 |} t
-   else
-    J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  rle_decide t t2.
-  rle_decide t t1.
-  change (interv_vert_safe {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |}
-          {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |}
-          (Rmax tb (Rmax t1 t2)) te = Some v') in ivs.
-
-  inversion_clear tbletlete as [tblet tlete].
-  assert ((Rmax tb (Rmax t1 t2)) <= t) as LLboundary.
-  apply Rnot_le_lt in tgtt1.
-  apply Rnot_le_lt in tnlet2.
-  unfold Rmax.
-  destruct (Rle_dec t1 t2). destruct (Rle_dec tb t2); fourier.
-  destruct (Rle_dec tb t1); fourier.
-
-  eapply Rle_trans. apply vmdlev'.
-  eapply safely_separated_second_order_polynomial_interval.
-  split.  apply LLboundary. apply tlete.
-  assumption.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  exfalso.
-  change (te < Rmax tb (Rmax t1 t2)) in tbgt.
-  apply Rnot_le_lt in tgtt1.
-  apply Rnot_le_lt in tnlet2.
-  assert (Rmax tb (Rmax t1 t2) <= te) as tegeRmax.
-  inversion_clear tbletlete as [tblet tlete].
-  unfold Rmin, Rmax.
-  destruct (Rle_dec t1 t2). destruct (Rle_dec tb t2); fourier.
-  destruct (Rle_dec tb t1); fourier.
-  eapply Rgt_not_le. eapply tbgt. assumption.
-Qed.
-
-Theorem safely_separated_trajectory_interval_above''':
-  forall aa1 ab1 v1 vt1 z1 (* 1 above *)
-         aa2 ab2 v2 vt2 z2 (* 2 below *)
-         vmd tb te,
-    ~ vt1 <= v1 -> vt2 <= v2 ->
-    vert_safe_above aa1 ab1 v1 vt1 z1 aa2 ab2 v2 vt2 z2 tb te = Some vmd ->
-    (forall t, tb <= t <= te ->
-               vmd <= K aa1 ab1 v1 vt1 z1 t - K aa2 ab2 v2 vt2 z2 t).
-Proof.
-  intros aa1 ab1 v1 vt1 z1 aa2 ab2 v2 vt2 z2 vmd tb te.
-  intros vt1lev1 vt2lev2.
-  intros vsa t tbletlete.
-  set (t1 := (vt1 - v1)/ab1) in *.
-  set (t2 := (vt2 - v2)/aa2) in *.
-  generalize (Rle_dec t t1) as trelt1.
-  generalize (Rle_dec t t2) as trelt2.
-  intros.
-  inversion_clear trelt1 as [tlet1 | tgtt1].
-  inversion_clear trelt2 as [tlet2 | tgtt2].
-  inversion tbletlete as [tblet tlete].
-  assert (t <= (Rmin te (Rmin t1 t2))) as QQboundary.
-  unfold Rmin.
-  destruct (Rle_dec t1 t2).
-  destruct (Rle_dec te t1).
-  assumption. assumption.
-  destruct (Rle_dec te t2).
-  assumption. assumption.
-
-  generalize (Rlistmin_min_element _ 0 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-  unfold K.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := ab1 / 2; b := v1; c := z1 |} t
-   else
-    J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := aa2 / 2; b := v2; c := z2 |} t
-   else
-    J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  rle_decide t t2.
-  rle_decide t t1.
-  change (interv_vert_safe {| a := ab1 / 2; b := v1; c := z1 |}
-          {| a := aa2 / 2; b := v2; c := z2 |} tb
-          (Rmin te (Rmin t1 t2)) = 
-          Some v') in ivs.
-
-  eapply Rle_trans. apply vmdlev'.
-  eapply safely_separated_second_order_polynomial_interval.
-  split. eapply tblet. eapply QQboundary.
-  assumption.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  exfalso.
-  change (tb > Rmin te (Rmin t1 t2)) in tbgt.
-  assert (tb <= Rmin te (Rmin t1 t2)). fourier.
-  eapply Rgt_not_le. eapply tbgt. assumption.
-
-
-  (******************)
-  generalize (Rlistmin_min_element _ 2 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-  generalize (Rnot_le_lt _ _ tgtt2) as t2ltt. intros.
-
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-
-  unfold K.
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-  assert (t2 < t1) as t2ltt1.
-  eapply Rlt_le_trans. eapply t2ltt. assumption.
-  
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := ab1 / 2; b := v1; c := z1 |} t
-   else J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := aa2 / 2; b := v2; c := z2 |} t
-   else J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  change ((if Rlt_dec t2 t1
-         then
-          interv_vert_safe {| a := ab1 / 2; b := v1; c := z1 |}
-            {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |}
-            (Rmax tb (Rmin t1 t2))
-            (Rmin te (Rmax t1 t2))
-         else None) = Some v') in ivs.
-  rle_decide t t1.
-  rle_decide t t2.
-  case_eq (Rlt_dec t2 t1).
-  intros.
-  rewrite H in *. clear r H.
-
-  assert (~ t1 <= t2) as t1nget2.
-  apply Rlt_not_le. assumption.
-  
-  assert ((Rmax tb (Rmin t1 t2)) <= t <= (Rmin te (Rmax t1 t2))) as trange.
-  unfold Rmax, Rmin. split.
-  rle_decide t1 t2.
-  destruct (Rle_dec tb t2).
-  left.
-  inversion_clear tbletlete as [tblet tlete].
-  assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  
-  rle_decide t1 t2.
-  destruct (Rle_dec te t1). assumption. assumption.
-
-  generalize (safely_separated_second_order_polynomial_interval _ _ _ _ _ _ trange ivs).
-  intros.
-  eapply Rle_trans.
-  apply vmdlev'. assumption.
-
-  intros. exfalso. apply n. assumption.
-
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-    change ((if Rlt_dec t2 t1
-           then
-            interv_vert_safe {| a := ab1 / 2; b := v1; c := z1 |}
-              {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |}
-              (Rmax tb (Rmin t1 t2))
-              (Rmin te (Rmax t1 t2))
-           else None) = None) in novmd.
-
-  assert (t2 < t1) as t2ltt1.
-  eapply Rlt_le_trans. eapply t2ltt. assumption.
-  
-  case_eq (Rlt_dec t2 t1).
-  intros.
-
-  rewrite H in *. clear r H.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros. exfalso.
-  unfold Rmin,Rmax in tbgt.
-  assert (~ t1 <= t2) as t1nlet2. apply Rlt_not_le. assumption.
-  rle_decide t1 t2. clear t1nlet2. clear tgtt2 novmd.
-  inversion_clear tbletlete as [tblet tlete].
-  apply Rgt_lt in tbgt. (* swap assumption *)
-  destruct (Rle_dec tb t2); destruct (Rle_dec te t1).
-  fourier. fourier. fourier. fourier.
-  intros. exfalso. apply n. assumption.
-  (******************)
-
-  inversion_clear trelt2 as [tlet2 | tnlet2].
-
-  generalize (Rlistmin_min_element _ 3 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-
-  unfold K.
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-  assert (t1 < t2) as t1ltt2.
-  eapply Rlt_le_trans.
-  apply Rnot_le_lt. apply tgtt1. assumption.
-  
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := ab1 / 2; b := v1; c := z1 |} t
-   else J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := aa2 / 2; b := v2; c := z2 |} t
-   else J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  change ((if Rlt_dec t1 t2
-         then
-          interv_vert_safe {| a := 0; b := vt1; c := z1 - (vt1 - v1) / ab1 * (vt1 - v1) / 2 |}
-            {| a := aa2 / 2; b := v2; c := z2 |}
-            (Rmax tb (Rmin t1 t2)) (Rmin te (Rmax t1 t2)) else None) = Some v') in ivs.
-  rle_decide t t1.
-  rle_decide t t2.
-  case_eq (Rlt_dec t1 t2).
-  intros.
-  rewrite H in *. clear r H.
-
-(*  assert (~ t2 <= t1) as t2nget1. 
-  apply Rlt_not_le. assumption. *)
-
-  assert (t1 <= t2) as t1get2. left. assumption.
-  
-  assert ((Rmax tb (Rmin t1 t2)) <= t <= (Rmin te (Rmax t1 t2))) as trange.
-  unfold Rmax, Rmin. split.
-  rle_decide t1 t2.
-  destruct (Rle_dec tb t1).
-  left.
-  apply Rnot_le_lt in tgtt1. assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  
-  rle_decide t1 t2.
-  destruct (Rle_dec te t2). assumption. assumption.
-
-  generalize (safely_separated_second_order_polynomial_interval _ _ _ _ _ _ trange ivs).
-  intros.
-  eapply Rle_trans.
-  apply vmdlev'. assumption.
-
-  intros. exfalso. apply n. assumption.
-
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-  change ((if Rlt_dec t1 t2
-           then
-            interv_vert_safe {| a := 0; b := vt1; c := z1 - (vt1 - v1) / ab1 * (vt1 - v1) / 2 |}
-              {| a := aa2 / 2; b := v2; c := z2 |}
-              (Rmax tb (Rmin t1 t2)) (Rmin te (Rmax t1 t2))
-           else None) = None) in novmd.
-
-  assert (t1 < t2) as t1ltt2.
-  apply Rnot_le_lt in tgtt1.
-  eapply Rlt_le_trans. eapply tgtt1. assumption.
-  
-  case_eq (Rlt_dec t1 t2).
-  intros.
-
-  rewrite H in *. clear r H.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros. exfalso.
-  unfold Rmin,Rmax in tbgt.
-  assert (t1 <= t2) as t1let2. left. assumption.
-  rle_decide t1 t2. clear t1let2. clear novmd.
-  inversion_clear tbletlete as [tblet tlete].
-  apply Rnot_le_lt in tgtt1. (* swap assumption *)
-  destruct (Rle_dec tb t1); destruct (Rle_dec te t2).
-  fourier. fourier. fourier. fourier.
-  intros. exfalso. apply n. assumption.
-  (******************)
-
-  generalize (Rlistmin_min_element _ 1 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-  unfold K.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := ab1 / 2; b := v1; c := z1 |} t
-   else
-    J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := aa2 / 2; b := v2; c := z2 |} t
-   else
-    J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  rle_decide t t2.
-  rle_decide t t1.
-  change (interv_vert_safe {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |}
-          {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |}
-          (Rmax tb (Rmax t1 t2)) te = Some v') in ivs.
-
-  inversion_clear tbletlete as [tblet tlete].
-  assert ((Rmax tb (Rmax t1 t2)) <= t) as LLboundary.
-  apply Rnot_le_lt in tgtt1.
-  apply Rnot_le_lt in tnlet2.
-  unfold Rmax.
-  destruct (Rle_dec t1 t2). destruct (Rle_dec tb t2); fourier.
-  destruct (Rle_dec tb t1); fourier.
-
-  eapply Rle_trans. apply vmdlev'.
-  eapply safely_separated_second_order_polynomial_interval.
-  split.  apply LLboundary. apply tlete.
-  assumption.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  exfalso.
-  change (te < Rmax tb (Rmax t1 t2)) in tbgt.
-  apply Rnot_le_lt in tgtt1.
-  apply Rnot_le_lt in tnlet2.
-  assert (Rmax tb (Rmax t1 t2) <= te) as tegeRmax.
-  inversion_clear tbletlete as [tblet tlete].
-  unfold Rmin, Rmax.
-  destruct (Rle_dec t1 t2). destruct (Rle_dec tb t2); fourier.
-  destruct (Rle_dec tb t1); fourier.
-  eapply Rgt_not_le. eapply tbgt. assumption.
-Qed.
-
-
-
-Theorem safely_separated_trajectory_interval_above'''':
-  forall aa1 ab1 v1 vt1 z1 (* 1 above *)
-         aa2 ab2 v2 vt2 z2 (* 2 below *)
-         vmd tb te,
-    ~ vt1 <= v1 -> ~ vt2 <= v2 ->
-    vert_safe_above aa1 ab1 v1 vt1 z1 aa2 ab2 v2 vt2 z2 tb te = Some vmd ->
-    (forall t, tb <= t <= te ->
-               vmd <= K aa1 ab1 v1 vt1 z1 t - K aa2 ab2 v2 vt2 z2 t).
-Proof.
-  intros aa1 ab1 v1 vt1 z1 aa2 ab2 v2 vt2 z2 vmd tb te.
-  intros vt1lev1 vt2nlev2.
-  intros vsa t tbletlete.
-  set (t1 := (vt1 - v1)/ab1) in *.
-  set (t2 := (vt2 - v2)/ab2) in *.
-  generalize (Rle_dec t t1) as trelt1.
-  generalize (Rle_dec t t2) as trelt2.
-  intros.
-  inversion_clear trelt1 as [tlet1 | tgtt1].
-  inversion_clear trelt2 as [tlet2 | tgtt2].
-  inversion tbletlete as [tblet tlete].
-  assert (t <= (Rmin te (Rmin t1 t2))) as QQboundary.
-  unfold Rmin.
-  destruct (Rle_dec t1 t2).
-  destruct (Rle_dec te t1).
-  assumption. assumption.
-  destruct (Rle_dec te t2).
-  assumption. assumption.
-
-  generalize (Rlistmin_min_element _ 0 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-  unfold K.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := ab1 / 2; b := v1; c := z1 |} t
-   else
-    J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := ab2 / 2; b := v2; c := z2 |} t
-   else
-    J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  rle_decide t t2.
-  rle_decide t t1.
-  change (interv_vert_safe {| a := ab1 / 2; b := v1; c := z1 |}
-          {| a := ab2 / 2; b := v2; c := z2 |} tb
-          (Rmin te (Rmin t1 t2)) = 
-          Some v') in ivs.
-
-  eapply Rle_trans. apply vmdlev'.
-  eapply safely_separated_second_order_polynomial_interval.
-  split. eapply tblet. eapply QQboundary.
-  assumption.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  exfalso.
-  change (tb > Rmin te (Rmin t1 t2)) in tbgt.
-  assert (tb <= Rmin te (Rmin t1 t2)). fourier.
-  eapply Rgt_not_le. eapply tbgt. assumption.
-
-
-  (******************)
-  generalize (Rlistmin_min_element _ 2 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-  generalize (Rnot_le_lt _ _ tgtt2) as t2ltt. intros.
-
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-
-  unfold K.
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-  assert (t2 < t1) as t2ltt1.
-  eapply Rlt_le_trans. eapply t2ltt. assumption.
-  
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := ab1 / 2; b := v1; c := z1 |} t
-   else J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := ab2 / 2; b := v2; c := z2 |} t
-   else J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  change ((if Rlt_dec t2 t1
-         then
-          interv_vert_safe {| a := ab1 / 2; b := v1; c := z1 |}
-            {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |}
-            (Rmax tb (Rmin t1 t2))
-            (Rmin te (Rmax t1 t2))
-         else None) = Some v') in ivs.
-  rle_decide t t1.
-  rle_decide t t2.
-  case_eq (Rlt_dec t2 t1).
-  intros.
-  rewrite H in *. clear r H.
-
-  assert (~ t1 <= t2) as t1nget2.
-  apply Rlt_not_le. assumption.
-  
-  assert ((Rmax tb (Rmin t1 t2)) <= t <= (Rmin te (Rmax t1 t2))) as trange.
-  unfold Rmax, Rmin. split.
-  rle_decide t1 t2.
-  destruct (Rle_dec tb t2).
-  left.
-  inversion_clear tbletlete as [tblet tlete].
-  assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  
-  rle_decide t1 t2.
-  destruct (Rle_dec te t1). assumption. assumption.
-
-  generalize (safely_separated_second_order_polynomial_interval _ _ _ _ _ _ trange ivs).
-  intros.
-  eapply Rle_trans.
-  apply vmdlev'. assumption.
-
-  intros. exfalso. apply n. assumption.
-
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-    change ((if Rlt_dec t2 t1
-           then
-            interv_vert_safe {| a := ab1 / 2; b := v1; c := z1 |}
-              {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |}
-              (Rmax tb (Rmin t1 t2))
-              (Rmin te (Rmax t1 t2))
-           else None) = None) in novmd.
-
-  assert (t2 < t1) as t2ltt1.
-  eapply Rlt_le_trans. eapply t2ltt. assumption.
-  
-  case_eq (Rlt_dec t2 t1).
-  intros.
-
-  rewrite H in *. clear r H.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros. exfalso.
-  unfold Rmin,Rmax in tbgt.
-  assert (~ t1 <= t2) as t1nlet2. apply Rlt_not_le. assumption.
-  rle_decide t1 t2. clear t1nlet2. clear tgtt2 novmd.
-  inversion_clear tbletlete as [tblet tlete].
-  apply Rgt_lt in tbgt. (* swap assumption *)
-  destruct (Rle_dec tb t2); destruct (Rle_dec te t1).
-  fourier. fourier. fourier. fourier.
-  intros. exfalso. apply n. assumption.
-  (******************)
-
-  inversion_clear trelt2 as [tlet2 | tnlet2].
-
-  generalize (Rlistmin_min_element _ 3 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-
-  unfold K.
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-  assert (t1 < t2) as t1ltt2.
-  eapply Rlt_le_trans.
-  apply Rnot_le_lt. apply tgtt1. assumption.
-  
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := ab1 / 2; b := v1; c := z1 |} t
-   else J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := ab2 / 2; b := v2; c := z2 |} t
-   else J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  change ((if Rlt_dec t1 t2
-         then
-          interv_vert_safe {| a := 0; b := vt1; c := z1 - (vt1 - v1) / ab1 * (vt1 - v1) / 2 |}
-            {| a := ab2 / 2; b := v2; c := z2 |}
-            (Rmax tb (Rmin t1 t2)) (Rmin te (Rmax t1 t2)) else None) = Some v') in ivs.
-  rle_decide t t1.
-  rle_decide t t2.
-  case_eq (Rlt_dec t1 t2).
-  intros.
-  rewrite H in *. clear r H.
-
-(*  assert (~ t2 <= t1) as t2nget1. 
-  apply Rlt_not_le. assumption. *)
-
-  assert (t1 <= t2) as t1get2. left. assumption.
-  
-  assert ((Rmax tb (Rmin t1 t2)) <= t <= (Rmin te (Rmax t1 t2))) as trange.
-  unfold Rmax, Rmin. split.
-  rle_decide t1 t2.
-  destruct (Rle_dec tb t1).
-  left.
-  apply Rnot_le_lt in tgtt1. assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  assumption.
-  inversion_clear tbletlete as [tblet tlete].
-  
-  rle_decide t1 t2.
-  destruct (Rle_dec te t2). assumption. assumption.
-
-  generalize (safely_separated_second_order_polynomial_interval _ _ _ _ _ _ trange ivs).
-  intros.
-  eapply Rle_trans.
-  apply vmdlev'. assumption.
-
-  intros. exfalso. apply n. assumption.
-
-  rle_decide vt2 v2.
-  rle_decide vt1 v1.
-  change ((if Rlt_dec t1 t2
-           then
-            interv_vert_safe {| a := 0; b := vt1; c := z1 - (vt1 - v1) / ab1 * (vt1 - v1) / 2 |}
-              {| a := ab2 / 2; b := v2; c := z2 |}
-              (Rmax tb (Rmin t1 t2)) (Rmin te (Rmax t1 t2))
-           else None) = None) in novmd.
-
-  assert (t1 < t2) as t1ltt2.
-  apply Rnot_le_lt in tgtt1.
-  eapply Rlt_le_trans. eapply tgtt1. assumption.
-  
-  case_eq (Rlt_dec t1 t2).
-  intros.
-
-  rewrite H in *. clear r H.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros. exfalso.
-  unfold Rmin,Rmax in tbgt.
-  assert (t1 <= t2) as t1let2. left. assumption.
-  rle_decide t1 t2. clear t1let2. clear novmd.
-  inversion_clear tbletlete as [tblet tlete].
-  apply Rnot_le_lt in tgtt1. (* swap assumption *)
-  destruct (Rle_dec tb t1); destruct (Rle_dec te t2).
-  fourier. fourier. fourier. fourier.
-  intros. exfalso. apply n. assumption.
-  (******************)
-
-  generalize (Rlistmin_min_element _ 1 _ vsa (eq_refl true)) as cadist.
-  intros. unfold nth in cadist. simpl.
-  inversion_clear cadist as [[v' [ivs vmdlev']] | novmd].
-
-  unfold K.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  change (vmd <=
-  (if Rle_dec t t1
-   then J {| a := ab1 / 2; b := v1; c := z1 |} t
-   else
-    J {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |} t) -
-  (if Rle_dec t t2
-   then J {| a := ab2 / 2; b := v2; c := z2 |} t
-   else
-    J {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |} t)).
-
-  rle_decide t t2.
-  rle_decide t t1.
-  change (interv_vert_safe {| a := 0; b := vt1; c := z1 - t1 * (vt1 - v1) / 2 |}
-          {| a := 0; b := vt2; c := z2 - t2 * (vt2 - v2) / 2 |}
-          (Rmax tb (Rmax t1 t2)) te = Some v') in ivs.
-
-  inversion_clear tbletlete as [tblet tlete].
-  assert ((Rmax tb (Rmax t1 t2)) <= t) as LLboundary.
-  apply Rnot_le_lt in tgtt1.
-  apply Rnot_le_lt in tnlet2.
-  unfold Rmax.
-  destruct (Rle_dec t1 t2). destruct (Rle_dec tb t2); fourier.
-  destruct (Rle_dec tb t1); fourier.
-
-  eapply Rle_trans. apply vmdlev'.
-  eapply safely_separated_second_order_polynomial_interval.
-  split.  apply LLboundary. apply tlete.
-  assumption.
-
-  generalize (ivs_interval_empty _ _ _ _ novmd) as tbgt.
-  intros.
-  rle_decide vt1 v1.
-  rle_decide vt2 v2.
-  exfalso.
-  change (te < Rmax tb (Rmax t1 t2)) in tbgt.
-  apply Rnot_le_lt in tgtt1.
-  apply Rnot_le_lt in tnlet2.
-  assert (Rmax tb (Rmax t1 t2) <= te) as tegeRmax.
-  inversion_clear tbletlete as [tblet tlete].
-  unfold Rmin, Rmax.
-  destruct (Rle_dec t1 t2). destruct (Rle_dec tb t2); fourier.
-  destruct (Rle_dec tb t1); fourier.
-  eapply Rgt_not_le. eapply tbgt. assumption.
-Qed.
-
-
-Theorem safely_separated_trajectory_interval_above:
-  forall aa1 ab1 v1 vt1 z1 (* 1 above *)
-         aa2 ab2 v2 vt2 z2 (* 2 below *)
-         vmd tb te,
-    vert_safe_above aa1 ab1 v1 vt1 z1 aa2 ab2 v2 vt2 z2 tb te = Some vmd ->
-    (forall t, tb <= t <= te ->
-               vmd <= K aa1 ab1 v1 vt1 z1 t - K aa2 ab2 v2 vt2 z2 t).
-  intros.
-  case_eq (Rle_dec vt1 v1); case_eq (Rle_dec vt2 v2); intros.
-  eapply safely_separated_trajectory_interval_above'; try eassumption.
-  eapply safely_separated_trajectory_interval_above''; try eassumption.
-  eapply safely_separated_trajectory_interval_above'''; try eassumption.
-  eapply safely_separated_trajectory_interval_above''''; try eassumption.
-Qed.
 
 Ltac assume n := generalize n; intro.
 
