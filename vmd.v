@@ -110,8 +110,8 @@ Proof.
   inversion_clear H. fourier.
   
   unfold interv_vert_safe, Poly, J in sfty. simpl in sfty.
-  destruct (Rle_dec t1 t2).
-  Focus 2. apply False_ind. apply n. apply t1let2. clear r.
+  destruct (Rle_dec t1 t2);
+    [ clear r| apply False_ind; apply n; apply t1let2; clear r].
   set (A := (au - al)) in *.
   set (B := (bu - bl)) in *.
   set (C := (cu - cl - vmd)) in *.
@@ -121,14 +121,14 @@ Proof.
   rename H0 into fderivable.
   rename H1 into f'derivable.
   
-  destruct (total_order_T A 0); [destruct s | idtac]; try
+  destruct (total_order_T A 0); [destruct s | ]; try
   (assert (f' (-B/(2*A)) = 0); [
     unfold f', fct_cte, mult_fct, plus_fct, id; field;
     intro Aeq0; rewrite Aeq0 in r; generalize (Rlt_irrefl 0);
     intro not0lt0; apply not0lt0; assumption
-   | idtac]).
+   | ]).
 
-  Focus 2.
+  2: {
   (* linear case A=0 *)
   (* A=0, B<=0 *)
   rewrite e in *.
@@ -172,9 +172,9 @@ Proof.
   rewrite e in H0. 
   assert (t^2 = (t*t)). field.
   rewrite <- H2 in H0. assumption.
+  }
 
   (* case A<0 *)
-
   assert (forall q, (f (- B / (2 * A) + q) = f (- B / (2 * A) - q))) as fsym. intros.
   unfold f, fct_cte, mult_fct, plus_fct, id, Rsqr.
   Radd (- C - A*B*B/(2*2*A*A) - A*q*q).
@@ -222,11 +222,13 @@ Proof.
 
   inversion_clear t1let2 as [t1ltt2 | l1eqt2].
 
-  Focus 2. (* t1=t2 case*) inversion_clear H. subst. inversion_clear H1.
+  2 : { (* t1=t2 case*) inversion_clear H. subst. inversion_clear H1.
   inversion_clear H0. generalize (Rlt_asym _ _ H). intro.
   apply False_ind. apply H0. assumption.
   subst. apply False_ind. eapply Rlt_irrefl. apply H.
   subst. rewrite sfty. right. reflexivity.
+
+  }
 
   assert (- B / (2*A) < t2) as cpos.
   assert ((t1+t2)/2 < t2). apply (Rmult_lt_reg_l 2). fourier.
@@ -250,7 +252,7 @@ Proof.
   generalize (Rle_dec t (- B / (2 * A))). intro tpos.
   inversion_clear tpos as [tposle | tposgt].
 
-  Focus 2. (* - B/(2*A) < t case *)
+  2 : { (* - B/(2*A) < t case *)
   assert (- B / (2*A) < t) as midltt.
   apply Rnot_le_lt. assumption. clear tposgt.
 
@@ -290,7 +292,7 @@ Proof.
   split. left. apply (Rlt_le_trans _ t). assumption.
   left. assumption. right. reflexivity. assumption.
   rewrite H. rewrite sfty. right. reflexivity.
-
+  }
   (* clear f''negL f'posL frising.*)
   assert (forall q, (- B / (2 * A) - (t2 - - B / (2 * A))) < q < - B / (2 * A) -> f'' q < 0)
     as f''negL. intros.
@@ -345,15 +347,15 @@ Proof.
   cut (0 <= f t). intro.
   unfold f, fct_cte, mult_fct, plus_fct, id, Rsqr in H0.
   setr (A * (t * t) + B * t + C). assumption.
-
+  
   inversion_clear t1let2 as [t1ltt2 | l1eqt2].
 
-  Focus 2. (* t1=t2 case*) inversion_clear H. subst. inversion_clear H1.
+  2 : { (* t1=t2 case*) inversion_clear H. subst. inversion_clear H1.
   inversion_clear H0. generalize (Rlt_asym _ _ H). intro.
   apply False_ind. apply H0. assumption.
   subst. apply False_ind. eapply Rlt_irrefl. apply H.
   subst. rewrite sfty. right. reflexivity.
-
+  }
   assert (t1 <= - B / (2*A)) as cpos.
   assert (t1 <= (t1+t2)/2). apply (Rmult_le_reg_l 2). fourier.
   setr (t1+t2). fourier.
@@ -374,9 +376,10 @@ Proof.
   assumption.
 
   generalize (Rle_dec t (- B / (2 * A))). intro tpos.
+  
   inversion_clear tpos as [tposle | tposgt].
 
-  Focus 2. (* - B/(2*A) < t case *)
+  2 :{ (* - B/(2*A) < t case *)
   assert (- B / (2*A) < t) as midltt.
   apply Rnot_le_lt. assumption. clear tposgt.
 
@@ -436,6 +439,7 @@ Proof.
   assert (- B / (2 * A) + (- B / (2 * A) - t1) = - B / (2 * A) + - B / (2 * A) - t1). field.
   intro aeq0. rewrite aeq0 in r. fourier. rewrite H0.
   reflexivity.
+  }
 
   (* clear f''negL f'posL frising.*)
   assert (forall q, t1 < q < - B / (2 * A) -> f'' q < 0)
@@ -843,9 +847,7 @@ Proof.
   intros. inversion H.
   intros.
   destruct i.
-  destruct a0.
-  Focus 2.
-  right. simpl. reflexivity.
+  destruct a0; [ | right; simpl; reflexivity ].
   left. exists r. split. simpl. reflexivity. clear H0.
   simpl in H.
   destruct (Rlistmin lst).

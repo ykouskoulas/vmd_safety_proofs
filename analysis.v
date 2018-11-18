@@ -154,11 +154,11 @@ Proof.
   inversion_clear H. inversion_clear H0.
   left. assumption.
   generalize (Emlb b H). intros.
-  inversion_clear H0.
-  Focus 2. rewrite H1 in fmeq0.
-  rewrite fmeq0 in fblt0.
-  apply False_ind.
-  apply (Rlt_irrefl 0). assumption.
+  inversion_clear H0;
+    [ | rewrite H1 in fmeq0;
+        rewrite fmeq0 in fblt0;
+        apply False_ind;
+        apply (Rlt_irrefl 0); assumption].
   generalize (Emub z Ez). intros.
   inversion_clear zwithin2.
   
