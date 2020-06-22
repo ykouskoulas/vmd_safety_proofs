@@ -1,8 +1,8 @@
-parnassos:vmd_safety_proofs yak$ coqtop --version
-The Coq Proof Assistant, version 8.6.1 (July 2017)
-compiled on Jul 28 2017 13:52:41 with OCaml 4.05.0
-parnassos:vmd_safety_proofs yak$ make
+$ coqtop --version
+The Coq Proof Assistant, version 8.10.2 (December 2019)
+compiled on Dec 8 2019 9:00:07 with OCaml 4.07.1
+$ make
 coqc seot_util.v
 coqc analysis.v
 coqc vmd.v
-parnassos:vmd_safety_proofs yak$
+$

@@ -1,7 +1,7 @@
 Require Import Reals.
 Require Import Rdefinitions.
 Require Import Classical.
-Require Import Fourier.
+Require Import Lra.
 Require Import seot_util.
 Require Import FunctionalExtensionality.
 Require Import Classical_Prop.
@@ -70,14 +70,14 @@ Proof.
   assumption.
   unfold Rabs.
   destruct (Rcase_abs (x - m)).
-  fourier.
-  fourier.
+  lra.
+  lra.
   generalize (contbox x precond) as nonzbnd. clear contbox precond.
   intros.
   unfold Rabs in nonzbnd.
   destruct (Rcase_abs (f x - f m)).
-  fourier.
-  fourier. clear contbox.
+  lra.
+  lra. clear contbox.
   subst. assumption.
   
   inversion_clear mislub as [misub nolowerub].
@@ -108,7 +108,7 @@ Proof.
 
   generalize (nolowerub (m - alpha/2) neub).
   apply Rlt_not_le .
-  fourier.
+  lra.
 
 
   inversion_clear H as [fmeq0 | fmgt0].
@@ -130,7 +130,7 @@ Proof.
   generalize (iub z Ez). intros.
   inversion_clear zwithin2.
   inversion_clear z0rng as [z0above z0below].
-  split. split. fourier.
+  split. split. lra.
 
   inversion_clear z0below. assumption.
   subst. rewrite fz0eq0 in fblt0.
@@ -155,15 +155,15 @@ Proof.
   left. assumption.
   generalize (Emlb b H). intros.
   inversion_clear H0.
-  Focus 2. rewrite H1 in fmeq0.
+  2 : { rewrite H1 in fmeq0.
   rewrite fmeq0 in fblt0.
   apply False_ind.
-  apply (Rlt_irrefl 0). assumption.
+  apply (Rlt_irrefl 0). assumption. }
   generalize (Emub z Ez). intros.
   inversion_clear zwithin2.
   
   split. split.
-  fourier. fourier. split. assumption.
+  lra. lra. split. assumption.
 
   intros q mqb.
   inversion_clear mqb as [mltq qltb].
@@ -176,8 +176,8 @@ Proof.
   assert (E q) as Eq.
   unfold E.
   split. split.
-  fourier.
-  fourier.
+  lra.
+  lra.
   assumption.
   generalize (Emub q Eq) as qlem. intros.
   apply (Rlt_not_le q m mltq).
@@ -193,7 +193,7 @@ Proof.
   inversion_clear z0rng as [qlez0 z0leb].
   split.
   split.
-  fourier.
+  lra.
   inversion z0leb as [z0ltb | z0eqb].
   assumption. rewrite z0eqb in fz0eq0.
   rewrite fz0eq0 in fblt0.
@@ -204,7 +204,7 @@ Proof.
   inversion_clear z0rng as [qlez0 z0leb].
 
   generalize (Emub z0 Ez0) as qlem. intros.
-  fourier.
+  lra.
 Qed.
 
 
@@ -238,7 +238,7 @@ Proof.
   
   generalize (last_leg_drop_edge f z b c zltb zroot fblt0) as llde. intros.
   inversion_clear llde as [p [[zlep pltb] [fpeq0 fqlt0]]].
-  exists p. split. split. fourier. assumption. split. assumption. assumption.
+  exists p. split. split. lra. assumption. split. assumption. assumption.
   
   apply (last_leg_drop_edge f a b c altb faeq0 fblt0).
 Qed.
@@ -260,15 +260,15 @@ Proof.
   assert (g (-b) >= 0) as gnbgt0.
   unfold g. rewrite Ropp_involutive. assumption.
 
-  assert (-b < -a) as nbltna. fourier.
+  assert (-b < -a) as nbltna. lra.
   generalize (last_leg_drop g (-b) (-a) cg nbltna gnbgt0 gnalt0) as root.
   intros.
   inversion_clear root as [p [[nbltp pltna] [gpeq0 rest]]].
   exists (-p).
   split.
   split.
-  fourier.
-  fourier.
+  lra.
+  lra.
   split.
   trivial.
   unfold g in rest.
@@ -276,7 +276,7 @@ Proof.
   intros q altltnp.
   inversion_clear altltnp as [altq qltnp].
   assert (p < -q < -a) as pltnqltna.
-  split; fourier.
+  split; lra.
   generalize (rest (-q) pltnqltna). intros.
   rewrite Ropp_involutive in H. assumption.
 Qed.
@@ -440,14 +440,14 @@ Proof.
   setr (y - (y - w) / 2). assumption.
   apply (Rmult_lt_reg_l 2). prove_sup.
   setl (y - w). unfold Rmin in H.
-  destruct (Rle_dec alpf alpg). fourier.
-  apply Rnot_le_lt in n. fourier.
+  destruct (Rle_dec alpf alpg). lra.
+  apply Rnot_le_lt in n. lra.
   apply False_ind.
   apply (Rge_not_lt _ _ r0).
   setr (-0). setl (- ((y - w)/2)).
   apply Ropp_lt_contravar.
   apply (Rmult_lt_reg_l 2). prove_sup.
-  setl 0. setr (y - w). fourier.
+  setl 0. setr (y - w). lra.
   
   fieldrewrite (y - (Rmin alpf alpg)/2 - y) (- Rmin alpf alpg / 2).
   unfold Rmin. destruct (Rle_dec alpf alpg).
@@ -455,16 +455,16 @@ Proof.
   setl (alpf / 2).
   apply (Rmult_lt_reg_l (2/alpf)). prove_sup.
   apply Rinv_0_lt_compat. assumption.
-  setl 1. intro. rewrite H in r0. assert (0 < 0). fourier.
+  setl 1. intro. rewrite H in r0. assert (0 < 0). lra.
   eapply Rlt_irrefl. apply H0.
-  setr 2. intro. rewrite H in r0. assert (0 < 0). fourier.
+  setr 2. intro. rewrite H in r0. assert (0 < 0). lra.
   eapply Rlt_irrefl. apply H0. prove_sup.
 
   apply (Rmult_lt_reg_l (2/alpf)). prove_sup.
   apply Rinv_0_lt_compat. assumption.
-  setl (-1). intro. rewrite H in r0. assert (0 < 0). fourier.
+  setl (-1). intro. rewrite H in r0. assert (0 < 0). lra.
   eapply Rlt_irrefl. apply H0.
-  setr 2. intro. rewrite H in r0. assert (0 < 0). fourier.
+  setr 2. intro. rewrite H in r0. assert (0 < 0). lra.
   eapply Rlt_irrefl. apply H0. prove_sup.
 
   assert (alpg < alpf) as alpgltalpf. apply Rnot_le_lt. assumption.
@@ -517,14 +517,14 @@ Proof.
   setr (y - (y - w) / 2). assumption.
   apply (Rmult_lt_reg_l 2). prove_sup.
   setl (y - w). unfold Rmin in H.
-  destruct (Rle_dec alpf alpg). fourier.
-  apply Rnot_le_lt in n. fourier.
+  destruct (Rle_dec alpf alpg). lra.
+  apply Rnot_le_lt in n. lra.
   apply False_ind.
   apply (Rge_not_lt _ _ r0).
   setr (-0). setl (- ((y - w)/2)).
   apply Ropp_lt_contravar.
   apply (Rmult_lt_reg_l 2). prove_sup.
-  setl 0. setr (y - w). fourier.
+  setl 0. setr (y - w). lra.
   
   fieldrewrite (y - (Rmin alpf alpg)/2 - y) (- Rmin alpf alpg / 2).
   unfold Rmin. destruct (Rle_dec alpf alpg).
@@ -571,7 +571,7 @@ Proof.
   Radd (- y + (y - w)/2). setl 0.
   setr ((y - w)/2).
   apply (Rmult_lt_reg_l 2). prove_sup. setl 0. setr (y - w).
-  fourier.
+  lra.
   
   Radd (-y + Rmin alpf alpg /2). setl 0.
   setr (Rmin alpf alpg / 2).
@@ -584,14 +584,14 @@ Proof.
   destruct (Rle_dec (y - Rmin alpf alpg / 2) (y - (y - w) / 2)).
   setr ((y+w) / 2).
   apply (Rmult_lt_reg_l 2). prove_sup. setr (y + w).
-  Radd (-w). setl w. setr y. fourier.
+  Radd (-w). setl w. setr y. lra.
   apply Rnot_le_lt in n.
   assert (Rmin alpf alpg < (y - w)).
   apply (Rmult_lt_reg_l (/2)).
   apply Rinv_0_lt_compat. prove_sup.
   Radd (y - Rmin alpf alpg / 2 - (y - w)/2).
   setl ( y - (y - w) / 2). setr (y - Rmin alpf alpg / 2). assumption.
-  fourier.
+  lra.
 
   assert (w < alp < y) as wltalplty. split; try assumption.
   generalize (gxltfx alp wltalplty) as galtfa. intros.
@@ -609,7 +609,7 @@ Proof.
   apply Rinv_0_lt_compat. prove_sup.
   setl (- (g alp - g y)). setr ((g y - f y)/2). assumption.
   
-  assert (f alp < f y) as faltfy. fourier.
+  assert (f alp < f y) as faltfy. lra.
 
   (*  falp < f y < (f y + g y)/2 < g alp *)
   assert (f alp < g alp) as falega.
@@ -617,11 +617,11 @@ Proof.
   eapply Rlt_trans. apply fybelow.
   eapply Rlt_le_trans. apply H. right. reflexivity.
   eapply Rlt_not_ge. apply falega.
-  fourier.
+  lra.
 
-  assert (g y <= g alp) as gyltga. fourier.
-  assert (f alp < f y) as faltfy. fourier.
-  assert (f alp < g alp) as faltga. fourier.
+  assert (g y <= g alp) as gyltga. lra.
+  assert (f alp < f y) as faltfy. lra.
+  assert (f alp < g alp) as faltga. lra.
   eapply Rlt_not_le. eapply faltga.
   assumption.
 
@@ -653,10 +653,10 @@ Proof.
   eapply Rlt_trans. apply faltfg2.
   apply H.
   eapply Rlt_not_ge. apply falega.
-  fourier.
+  lra.
 
   unfold eps in gfacts, ffacts.
-  assert (g y <= g alp) as gyltga. fourier.
+  assert (g y <= g alp) as gyltga. lra.
 
   assert (f alp < (f y + g y)/2) as faltfg2.
   apply (Rmult_lt_reg_l 2). prove_sup.
@@ -672,5 +672,5 @@ Proof.
   eapply Rlt_trans. apply faltfg2.
   eapply Rlt_le_trans. apply gyabove.
   assumption.
-  fourier.
+  lra.
 Qed.

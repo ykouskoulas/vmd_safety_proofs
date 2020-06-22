@@ -1,6 +1,6 @@
 Require Import Classical.
 Require Import Reals.
-Require Import Fourier.
+Require Import Lra.
 Require Import seot_util.
 Require Import FunctionalExtensionality.
 Require Import analysis.
@@ -61,7 +61,7 @@ Theorem ivs_empty_interval : forall trj1 trj2 tb te,
   intros.
   unfold interv_vert_safe.
   case_eq (Rle_dec tb te). intros.
-  fourier. intros. reflexivity.
+  lra. intros. reflexivity.
 Qed.
 
 Theorem ivs_interval_empty : forall trj1 trj2 tb te,
@@ -107,11 +107,12 @@ Proof.
   setr ((au-al) * t ^ 2 + (bu-bl)* t + (cu-cl-vmd)).
 
   assert (t1 <= t2) as t1let2.
-  inversion_clear H. fourier.
+  inversion_clear H. lra.
   
   unfold interv_vert_safe, Poly, J in sfty. simpl in sfty.
   destruct (Rle_dec t1 t2).
-  Focus 2. apply False_ind. apply n. apply t1let2. clear r.
+  2 : { apply False_ind. apply n. apply t1let2. }
+  clear r.
   set (A := (au - al)) in *.
   set (B := (bu - bl)) in *.
   set (C := (cu - cl - vmd)) in *.
@@ -128,7 +129,7 @@ Proof.
     intro not0lt0; apply not0lt0; assumption
    | idtac]).
 
-  Focus 2.
+  2 : {
   (* linear case A=0 *)
   (* A=0, B<=0 *)
   rewrite e in *.
@@ -161,7 +162,7 @@ Proof.
   setr (B*t). setl (B * t1).
   apply Rmult_le_compat_l. left.
   generalize (Rnot_le_gt _ _ n). intro.
-  fourier.
+  lra.
   inversion H. assumption.
 
   assert (f t1 = 0).
@@ -172,39 +173,39 @@ Proof.
   rewrite e in H0. 
   assert (t^2 = (t*t)). field.
   rewrite <- H2 in H0. assumption.
-
+   }
   (* case A<0 *)
 
   assert (forall q, (f (- B / (2 * A) + q) = f (- B / (2 * A) - q))) as fsym. intros.
   unfold f, fct_cte, mult_fct, plus_fct, id, Rsqr.
   Radd (- C - A*B*B/(2*2*A*A) - A*q*q).
   setl (B * (- B / (2 * A) + q) - 2*A*B*q/(2*A)).
-  intro aeq0. rewrite aeq0 in r.  fourier.
+  intro aeq0. rewrite aeq0 in r.  lra.
   setr (B * (- B / (2 * A) - q) + 2*A*B*q/(2*A)).
-  intro aeq0. rewrite aeq0 in r.  fourier.
+  intro aeq0. rewrite aeq0 in r.  lra.
   field.
-  intro aeq0. rewrite aeq0 in r.  fourier.
+  intro aeq0. rewrite aeq0 in r.  lra.
   
   rename H0 into f'extr.
 
   generalize (fsym (B / (2 * A) + t1)). intros feq.
   assert ((- B / (2 * A) + (B / (2 * A) + t1)) = t1). field.
-  intro aeq0. rewrite aeq0 in r.  fourier.
+  intro aeq0. rewrite aeq0 in r.  lra.
   rewrite H0 in feq. clear H0.
 
   assert ((- B / (2 * A) - (B / (2 * A) + t1)) =
           (- B / (2 * A) + (- B / (2 * A)) - t1)). field.
-  intro aeq0. rewrite aeq0 in r. fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
   rewrite H0 in feq. clear H0.
 
   generalize (fsym (B / (2 * A) + t2)). intros feq2.
   assert ((- B / (2 * A) + (B / (2 * A) + t2)) = t2). field.
-  intro aeq0. rewrite aeq0 in r.  fourier.
+  intro aeq0. rewrite aeq0 in r.  lra.
   rewrite H0 in feq2. clear H0.
 
   assert ((- B / (2 * A) - (B / (2 * A) + t2)) =
           (- B / (2 * A) - (t2 - - B / (2 * A)))). field.
-  intro aeq0. rewrite aeq0 in r. fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
   rewrite H0 in feq2. clear H0.
 
   (* to the left of our [t1,t2] window *)
@@ -222,42 +223,42 @@ Proof.
 
   inversion_clear t1let2 as [t1ltt2 | l1eqt2].
 
-  Focus 2. (* t1=t2 case*) inversion_clear H. subst. inversion_clear H1.
+  2 : { (* t1=t2 case*) inversion_clear H. subst. inversion_clear H1.
   inversion_clear H0. generalize (Rlt_asym _ _ H). intro.
   apply False_ind. apply H0. assumption.
   subst. apply False_ind. eapply Rlt_irrefl. apply H.
-  subst. rewrite sfty. right. reflexivity.
+  subst. rewrite sfty. right. reflexivity. }
 
   assert (- B / (2*A) < t2) as cpos.
-  assert ((t1+t2)/2 < t2). apply (Rmult_lt_reg_l 2). fourier.
-  setl (t1+t2). fourier.
+  assert ((t1+t2)/2 < t2). apply (Rmult_lt_reg_l 2). lra.
+  setl (t1+t2). lra.
   apply (Rlt_trans _  ((t1+t2)/2) _). assumption. assumption.
 
   assert (- B / (2 * A) + - B / (2 * A) - t1 < t2) as t1gap.
   Radd t1.
   setl (2 * - B / (2*A)).
-  intro aeq0. rewrite aeq0 in r. fourier.
-  apply (Rmult_lt_reg_l (1/2)). fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
+  apply (Rmult_lt_reg_l (1/2)). lra.
   setl (-B/(2*A)).
-  intro aeq0. rewrite aeq0 in r. fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
   setr ((t1+t2)/2). assumption.
 
   assert (- B / (2 * A) - (t2 - - B / (2 * A)) < t1) as t2gap.
   Radd (t2 - t1). setr t2. setl (- B / (2 * A) + - B / (2 * A) - t1).
-  intro aeq0. rewrite aeq0 in r. fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
   assumption.
 
   generalize (Rle_dec t (- B / (2 * A))). intro tpos.
   inversion_clear tpos as [tposle | tposgt].
 
-  Focus 2. (* - B/(2*A) < t case *)
+  2 : {(* - B/(2*A) < t case *)
   assert (- B / (2*A) < t) as midltt.
   apply Rnot_le_lt. assumption. clear tposgt.
 
 (*  clear f''negR f'negR ffalling.*)
   assert (forall q, - B / (2 * A) < q < t2 -> f'' q < 0) as f''negR. intros.
   unfold f'', fct_cte, mult_fct, plus_fct, id, Rsqr.
-  fourier.
+  lra.
 
   assert (forall q,  (-B/(2*A)) < q < t2 -> f' q< 0) as f'negR.
   intros q interval.
@@ -286,16 +287,16 @@ Proof.
   inversion_clear H. inversion_clear H1.
   rewrite sfty. left.
   apply (ffalling t t2).
-  split. left. assumption. left. fourier.
+  split. left. assumption. left. lra.
   split. left. apply (Rlt_le_trans _ t). assumption.
   left. assumption. right. reflexivity. assumption.
   rewrite H. rewrite sfty. right. reflexivity.
-
+   }
   (* clear f''negL f'posL frising.*)
   assert (forall q, (- B / (2 * A) - (t2 - - B / (2 * A))) < q < - B / (2 * A) -> f'' q < 0)
     as f''negL. intros.
   unfold f'', fct_cte, mult_fct, plus_fct, id, Rsqr.
-  fourier.
+  lra.
 
   assert (forall q,  (- B / (2 * A) - (t2 - - B / (2 * A))) < q < (-B/(2*A)) -> 0 < f' q)
     as f'posL. intros q interval.
@@ -348,35 +349,35 @@ Proof.
 
   inversion_clear t1let2 as [t1ltt2 | l1eqt2].
 
-  Focus 2. (* t1=t2 case*) inversion_clear H. subst. inversion_clear H1.
+  2 : {(* t1=t2 case*) inversion_clear H. subst. inversion_clear H1.
   inversion_clear H0. generalize (Rlt_asym _ _ H). intro.
   apply False_ind. apply H0. assumption.
   subst. apply False_ind. eapply Rlt_irrefl. apply H.
-  subst. rewrite sfty. right. reflexivity.
+  subst. rewrite sfty. right. reflexivity. }
 
   assert (t1 <= - B / (2*A)) as cpos.
-  assert (t1 <= (t1+t2)/2). apply (Rmult_le_reg_l 2). fourier.
-  setr (t1+t2). fourier.
+  assert (t1 <= (t1+t2)/2). apply (Rmult_le_reg_l 2). lra.
+  setr (t1+t2). lra.
   apply (Rle_trans _  ((t1+t2)/2) _). assumption. assumption.
 
   assert (t2 <= - B / (2 * A) + (- B / (2 * A) - t1)) as t1gap.
   Radd t1.
   setr (2 * - B / (2*A)).
-  intro aeq0. rewrite aeq0 in r. fourier.
-  apply (Rmult_le_reg_l (1/2)). fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
+  apply (Rmult_le_reg_l (1/2)). lra.
   setr (-B/(2*A)).
-  intro aeq0. rewrite aeq0 in r. fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
   setl ((t1+t2)/2). assumption.
 
   assert (t1 <= - B / (2 * A) - (t2 - - B / (2 * A))) as t2gap.
   Radd (t2 - t1). setl t2. setr (- B / (2 * A) + (- B / (2 * A) - t1)).
-  intro aeq0. rewrite aeq0 in r. fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
   assumption.
 
   generalize (Rle_dec t (- B / (2 * A))). intro tpos.
   inversion_clear tpos as [tposle | tposgt].
 
-  Focus 2. (* - B/(2*A) < t case *)
+  2 : {(* - B/(2*A) < t case *)
   assert (- B / (2*A) < t) as midltt.
   apply Rnot_le_lt. assumption. clear tposgt.
 
@@ -384,7 +385,7 @@ Proof.
   assert (forall q, - B / (2 * A) < q < (- B / (2 * A) + (- B / (2 * A) - t1)) ->
                     f'' q < 0) as f''negR. intros.
   unfold f'', fct_cte, mult_fct, plus_fct, id, Rsqr.
-  fourier.
+  lra.
 
   assert (forall q,  (-B/(2*A)) < q < (- B / (2 * A) + (- B / (2 * A) - t1)) ->
                      f' q< 0) as f'negR. intros q interval.
@@ -414,7 +415,7 @@ Proof.
   inversion_clear H. inversion_clear H1.
   rewrite sfty. rewrite feq. left.
   assert (- B / (2 * A) + (- B / (2 * A) - t1) = - B / (2 * A) + - B / (2 * A) - t1). field.
-  intro aeq0. rewrite aeq0 in r. fourier. rewrite <- H1.  clear H1.
+  intro aeq0. rewrite aeq0 in r. lra. rewrite <- H1.  clear H1.
   apply ffalling.
   split. left. assumption. apply (Rle_trans _ t2). left. assumption. assumption.
   split. apply (Rle_trans _ t). left. assumption.
@@ -427,21 +428,21 @@ Proof.
   split. left. assumption. assumption.
   split. left. apply (Rlt_le_trans _ t2). assumption. 
   assert (- B / (2 * A) + (- B / (2 * A) - t1) = - B / (2 * A) + - B / (2 * A) - t1). field.
-  intro aeq0. rewrite aeq0 in r. fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
   rewrite <- H0.  assumption. right. field.
-  intro aeq0. rewrite aeq0 in r. fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
   assert (- B / (2 * A) + (- B / (2 * A) - t1) = - B / (2 * A) + - B / (2 * A) - t1). field.
-  intro aeq0. rewrite aeq0 in r. fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
   rewrite <- H0. assumption. rewrite H. right. 
   assert (- B / (2 * A) + (- B / (2 * A) - t1) = - B / (2 * A) + - B / (2 * A) - t1). field.
-  intro aeq0. rewrite aeq0 in r. fourier. rewrite H0.
-  reflexivity.
-
+  intro aeq0. rewrite aeq0 in r. lra. rewrite H0.
+  reflexivity. }
+  
   (* clear f''negL f'posL frising.*)
   assert (forall q, t1 < q < - B / (2 * A) -> f'' q < 0)
     as f''negL. intros.
   unfold f'', fct_cte, mult_fct, plus_fct, id, Rsqr.
-  fourier.
+  lra.
 
   assert (forall q,  t1 < q < (-B/(2*A)) -> 0 < f' q)
     as f'posL. intros q interval.
@@ -479,7 +480,7 @@ Proof.
   
   assert (forall q, - B / (2 * A) < q < t2 -> 0 < f'' q ) as f''posR. intros.
   unfold f'', fct_cte, mult_fct, plus_fct, id, Rsqr.
-  fourier.
+  lra.
 
   assert (forall q,  (-B/(2*A)) < q < t2 -> 0 < f' q ) as f'posR.
   intros q interval.
@@ -508,7 +509,7 @@ Proof.
   assert (forall q, t1 < q < - B / (2 * A) -> 0 < f'' q)
     as f''posL. intros.
   unfold f'', fct_cte, mult_fct, plus_fct, id, Rsqr.
-  fourier.
+  lra.
 
   assert (forall q,  t1 < q < (-B/(2*A)) -> f' q < 0 )
     as f'negL. intros q interval.
@@ -547,7 +548,7 @@ Proof.
   unfold C.
   rewrite <- sfty.
   field.
-  intro aeq0. rewrite aeq0 in r. fourier.
+  intro aeq0. rewrite aeq0 in r. lra.
   clear sfty. rename H0 into sfty.
   rewrite sfty.
 
@@ -844,8 +845,8 @@ Proof.
   intros.
   destruct i.
   destruct a0.
-  Focus 2.
-  right. simpl. reflexivity.
+  2 : {
+  right. simpl. reflexivity. }
   left. exists r. split. simpl. reflexivity. clear H0.
   simpl in H.
   destruct (Rlistmin lst).
@@ -1075,7 +1076,7 @@ Proof.
   exfalso;
   change (tb > Rmin te (Rmin t1 t2)) in tbgt;
   assert (tb <= Rmin te (Rmin t1 t2)); [
-    fourier |
+    lra |
     eapply Rgt_not_le ; [ eapply tbgt | assumption]]]
   |
 
@@ -1147,8 +1148,8 @@ Proof.
   assert ((Rmax tb (Rmin t1 t2)) <= t <= (Rmin te (Rmax t1 t2))) as trange; [
   unfold Rmax, Rmin; inversion_clear tbletlete as [tblet tlete];
     rle_decide t1 t2;
-  split; [destruct (Rle_dec tb t2); fourier|
-  destruct (Rle_dec te t1); fourier] | idtac];
+  split; [destruct (Rle_dec tb t2); lra|
+  destruct (Rle_dec te t1); lra] | idtac];
 
   generalize (safely_separated_second_order_polynomial_interval _ _ _ _ _ _ trange ivs);
   intros; eapply Rle_trans; [apply vmdlev' | assumption]
@@ -1187,7 +1188,7 @@ Proof.
   rle_decide t1 t2; clear t1nlet2; clear tgtt2 novmd;
   inversion_clear tbletlete as [tblet tlete];
   apply Rgt_lt in tbgt; (* swap assumption *)
-  destruct (Rle_dec tb t2); destruct (Rle_dec te t1); fourier
+  destruct (Rle_dec tb t2); destruct (Rle_dec te t1); lra
   |
   exfalso; apply n; assumption]]]
   |
@@ -1301,7 +1302,7 @@ Proof.
     rle_decide t1 t2; clear t1let2; clear novmd;
     inversion_clear tbletlete as [tblet tlete];
     apply Rnot_le_lt in tgtt1; (* swap assumption *)
-    destruct (Rle_dec tb t1); destruct (Rle_dec te t2); fourier |
+    destruct (Rle_dec tb t1); destruct (Rle_dec te t2); lra |
     exfalso; apply n; assumption]] |
   (******************)
 
@@ -1362,8 +1363,8 @@ Proof.
   apply Rnot_le_lt in tgtt1;
   apply Rnot_le_lt in tnlet2;
   unfold Rmax;
-  destruct (Rle_dec t1 t2);[ destruct (Rle_dec tb t2); fourier |
-  destruct (Rle_dec tb t1); fourier] | idtac];
+  destruct (Rle_dec t1 t2);[ destruct (Rle_dec tb t2); lra |
+  destruct (Rle_dec tb t1); lra] | idtac];
 
   eapply Rle_trans; [apply vmdlev' | 
   eapply safely_separated_second_order_polynomial_interval; [
@@ -1383,8 +1384,8 @@ Proof.
   unfold Rmin, Rmax;
 
   destruct (Rle_dec t1 t2);
-    [destruct (Rle_dec tb t2); fourier |
-     destruct (Rle_dec tb t1); fourier] | idtac];
+    [destruct (Rle_dec tb t2); lra |
+     destruct (Rle_dec tb t1); lra] | idtac];
 
   eapply Rgt_not_le; [eapply tbgt | assumption]]]]).
 Qed.
@@ -1484,7 +1485,7 @@ Proof.
   setl (v y).
   setr C. assumption.
   assert (0 < f x) as zltfx. unfold f. Radd C.
-  setr (v x). setl C. fourier.
+  setr (v x). setl C. lra.
   assert (f x >= 0) as zlefx. left. assumption.
   generalize (last_leg_drop f x y contf xlty zlefx fyltz) as llr. intros.
   inversion_clear llr as [p [[xltp plty] [flhs below]]].
@@ -1519,13 +1520,13 @@ Proof.
   Radd (-C). setr 0. setl (v c - C). assumption.
   assumption.
 
-  assert (t1 <= c <t2) as cinterval; [split; fourier | idtac].
+  assert (t1 <= c <t2) as cinterval; [split; lra | idtac].
   generalize (vbelow c cinterval vcltvmin) as accel. intros. clear below.
   inversion_clear accel as [ableac acleamax].
   rewrite <- dveqa in ableac.
   unfold derive in ableac.
   assert (0 < derive_pt v c (dvv c)).
-  assume zltab. fourier.
+  assume zltab. lra.
   clear ableac acleamax.
   eapply Rlt_asym.
   apply H4. apply H1.
@@ -1560,7 +1561,7 @@ Proof.
   setr (v y).
   setl C. assumption.
   assert (f x < 0) as fxltz. unfold f. Radd C.
-  setl (v x). setr C. fourier.
+  setl (v x). setr C. lra.
   assert (f x <= 0 ) as fxle0. left. assumption.
   generalize (last_leg_rise f x y contf xlty fxle0 zltfy ) as llr. intros.
   inversion_clear llr as [p [[xltp plty] [flhs above]]].
@@ -1594,13 +1595,13 @@ Proof.
   apply (Rlt_trans vmax C (v c)). assumption.
   Radd (-C). setl 0. setr (v c - C). assumption.
 
-  assert (t1 <= c <t2) as cinterval; [split; fourier | idtac].
+  assert (t1 <= c <t2) as cinterval; [split; lra | idtac].
   generalize (vabove c cinterval vcgtvmax) as accel. intros. clear above.
   inversion_clear accel as [aminleac acleaa].
   rewrite <- dveqa in acleaa.
   unfold derive in acleaa.
   assert (derive_pt v c (dvv c) < 0).
-  assume aalt0.  fourier.
+  assume aalt0.  lra.
   clear acleaa aminleac.
   eapply Rlt_asym.
   apply H4. apply H1.
@@ -1688,7 +1689,7 @@ Proof.
   rewrite dveqa.
   unfold vl', fct_cte.
   apply vbelow.
-  inversion H0. split; fourier.
+  inversion H0. split; lra.
 
   assert (v x0 <= v y) as vx0levy.
   apply Rnot_lt_le. intro vyltvx0.
@@ -1696,28 +1697,28 @@ Proof.
   generalize (MVT_cor1 v x0 y dvv x0lty) as mvt. intro.
   inversion_clear mvt as [c [dpvc x0ltclty]].
   inversion_clear x0ltclty as [x0ltc clty].
-  assert (v y - v x0 < 0) as vxmvx0lt0. fourier.
+  assert (v y - v x0 < 0) as vxmvx0lt0. lra.
   rewrite dpvc in vxmvx0lt0.
   assert (derive_pt v c (dvv c) < 0) as vxmvx0lt00.
-  apply (Rmult_lt_reg_r (y-x0)). fourier.
+  apply (Rmult_lt_reg_r (y-x0)). lra.
   setr 0. assumption. clear vxmvx0lt0 dpvc.
   generalize (Rtotal_order (v c) vmin) as vcto. intros.
   inversion_clear vcto as [vcltvmin | vcgeqvmin].
-  assert (t1 <= c <t2) as cinterval; [split; fourier | idtac].
+  assert (t1 <= c <t2) as cinterval; [split; lra | idtac].
   generalize (vbelow c cinterval vcltvmin) as acrel. intros.
   inversion_clear acrel as [ableac acleamax].
   change ((derive v dvv) c < 0) in vxmvx0lt00.
   rewrite dveqa in vxmvx0lt00.
-  assert (0 <= a c) as zleac. assume zltab. fourier.
+  assert (0 <= a c) as zleac. assume zltab. lra.
   generalize zleac.
   apply Rlt_not_le. assumption.
   assert (vmin <= v c) as vminlevc.
   inversion_clear vcgeqvmin as [vceqvmin | vcgtvmin].
   right. symmetry. assumption. left. assumption. clear vcgeqvmin.
-  assert (t1 <= c <t2) as cinterval; [split; fourier | idtac].
+  assert (t1 <= c <t2) as cinterval; [split; lra | idtac].
   generalize (pilot_model_maintains_lower_bound_traj c cinterval vminlevc y yinterval clty) as vminlevy. intros.
   apply (Rlt_not_le vmin (v y)). assumption. assumption.
-  fourier.
+  lra.
   
 Qed.
 
@@ -1767,7 +1768,7 @@ Proof.
   rewrite dvleqvl'.
   rewrite dveqa.
   unfold vl', fct_cte.
-  apply vabove. inversion H. split ; fourier.
+  apply vabove. inversion H. split ; lra.
 
   assert (v y <= v x0) as vx0levy.
   apply Rnot_lt_le. intro vyltvx0.
@@ -1775,27 +1776,27 @@ Proof.
   generalize (MVT_cor1 v x0 y dvv x0lty) as mvt. intro.
   inversion_clear mvt as [c [dpvc x0ltclty]].
   inversion_clear x0ltclty as [x0ltc clty].
-  assert (0 < v y - v x0) as vxmvx0lt0. fourier.
+  assert (0 < v y - v x0) as vxmvx0lt0. lra.
   rewrite dpvc in vxmvx0lt0.
   assert (0 < derive_pt v c (dvv c) ) as vxmvx0lt00.
-  apply (Rmult_lt_reg_r (y-x0)). fourier.
+  apply (Rmult_lt_reg_r (y-x0)). lra.
   setl 0. assumption. clear vxmvx0lt0 dpvc.
   generalize (Rtotal_order vmax (v c)) as vcto. intros.
   inversion_clear vcto as [vcltvmin | vcgeqvmin].
-  assert (t1 <= c <t2) as cinterval; [split; fourier | idtac].
+  assert (t1 <= c <t2) as cinterval; [split; lra | idtac].
   generalize (vabove c cinterval vcltvmin) as acrel. intros.
   inversion_clear acrel as [ableac acleamax].
   change (0 < (derive v dvv) c) in vxmvx0lt00.
   rewrite dveqa in vxmvx0lt00.
-  assert (0 <= a c) as zleac. fourier. generalize zleac.
-  apply Rlt_not_le. assume aalt0. fourier.
+  assert (0 <= a c) as zleac. lra. generalize zleac.
+  apply Rlt_not_le. assume aalt0. lra.
   assert (v c <= vmax) as vminlevc.
   inversion_clear vcgeqvmin as [vceqvmin | vcgtvmin].
   right. symmetry. assumption. left. assumption. clear vcgeqvmin.
-  assert (t1 <= c <t2) as cinterval; [split; fourier | idtac].
+  assert (t1 <= c <t2) as cinterval; [split; lra | idtac].
   generalize (pilot_model_maintains_upper_bound_traj c cinterval vminlevc y yinterval clty) as vminlevy. intros.
   apply (Rlt_not_le (v y) vmax). assumption. assumption.
-  fourier.
+  lra.
   
 Qed.
 
@@ -1818,16 +1819,16 @@ Proof.
   left. assumption. right. right. assumption. right. left. assumption.
   clear vyvminto.
   inversion_clear vyvminrel as [vyltvmin | vygevmin ].
-  apply pilot_model_accel_below_traj. split; fourier.
-  assumption. split; fourier. fourier. assumption.
+  apply pilot_model_accel_below_traj. split; lra.
+  assumption. split; lra. lra. assumption.
   apply Rge_le in vygevmin.
 
   set (f := (fun q => v q - vmin)).
   assert (continuity f) as contf. unfold f.
   assume contv. reg.
-  assert (f x < 0) as fxlt0. unfold f. fourier.
-  assert (x < y) as xlty. fourier.
-  assert (f y >= 0) as fyge0. unfold f. fourier.
+  assert (f x < 0) as fxlt0. unfold f. lra.
+  assert (x < y) as xlty. lra.
+  assert (f y >= 0) as fyge0. unfold f. lra.
   generalize (first_leg_rise f x y contf xlty fxlt0 fyge0) as flr.
   intros. inversion_clear flr as [p [[xltp pley] [fpeq0 rst]]].
   unfold f in *.
@@ -1866,14 +1867,14 @@ Proof.
   change (fll y <= v y).
   assume contv.
   apply limpoint; try assumption. (* clear H1. *)
-  exists x. split. fourier.
+  exists x. split. lra.
   intros x0 xltx0lty.
   unfold fll, fct_cte, mult_fct, id, minus_fct, plus_fct.
   Radd (- v x). setl (ab * (x0 - x)). setr (v x0 - v x).
   inversion_clear xltx0lty as [xltx0 x0lty]. 
   apply pilot_model_accel_below_limit_traj; try assumption.
-  split; fourier.
-  split. fourier.
+  split; lra.
+  split. lra.
   rewrite <- ymxlttt.
   Radd x. setl x0. setr y.
   assumption.
@@ -1917,15 +1918,15 @@ Proof.
   left. assumption. right. right. assumption. right. left. assumption.
   clear vyvminto.
   inversion_clear vyvminrel as [vyltvmin | vygevmin ].
-  apply pilot_model_accel_above_traj. assumption. fourier. assumption. fourier. assumption.
+  apply pilot_model_accel_above_traj. assumption. lra. assumption. lra. assumption.
   apply Rge_le in vygevmin.
 
   set (f := (fun q => v q - vmax)).
   assert (continuity f) as contf. unfold f. assume contv.
   reg.
-  assert (0 < f x ) as fxlt0. unfold f. fourier.
-  assert (x < y) as xlty. fourier.
-  assert (f y <= 0) as fyge0. unfold f. fourier.
+  assert (0 < f x ) as fxlt0. unfold f. lra.
+  assert (x < y) as xlty. lra.
+  assert (f y <= 0) as fyge0. unfold f. lra.
   generalize (first_leg_drop f x y contf xlty fxlt0 fyge0) as flr.
   intros. inversion_clear flr as [p [[xltp pley] [fpeq0 rst]]].
   unfold f in *.
@@ -1937,7 +1938,7 @@ Proof.
   left. apply (Rmult_lt_reg_l (/(-aa))).
   apply Rinv_0_lt_compat. setl (- 0).
   apply Ropp_lt_cancel. repeat rewrite Ropp_involutive.
-  fourier.
+  lra.
   setr (- (y - x)).
   intro. rewrite H in aalt00. apply (Rlt_irrefl 0). assumption.
   setl (-((vmax - v x) / aa)).
@@ -1967,13 +1968,13 @@ Proof.
   assume contv.
   apply limpoint; try assumption. (* clear H1. *)
   exists x. split.
-  fourier.
+  lra.
   intros x0 xltx0lty.
   unfold fll, fct_cte, mult_fct, id, minus_fct, plus_fct.
   Radd (- v x). setr (aa * (x0 - x)). setl (v x0 - v x).
   inversion_clear xltx0lty.
   apply pilot_model_accel_above_limit_traj; try assumption.
-  split; fourier. split. 
+  split; lra. split. 
   Radd x. setl x. setr x0. assumption.
   rewrite <- ymeqvm.
   Radd x. setl x0. setr y.
@@ -2077,8 +2078,8 @@ Proof.
   rewrite dpeqv in contv0.
   inversion_clear H0 as [zltx0 x0ltx].
   inversion t1ltxltt.
-  assert (t1 <= t1 < t2) as t1interval. split; fourier.
-  assert (t1 <= x0 < t2) as x0interval. split; fourier.
+  assert (t1 <= t1 < t2) as t1interval. split; lra.
+  assert (t1 <= x0 < t2) as x0interval. split; lra.
     generalize (pilot_model_maintains_lower_bound_traj t1 t1interval r x0 x0interval zltx0) as vminbnd. intros.
 
   inversion_clear vminbnd as [vminltvx0 | vmineqvx0].
@@ -2098,7 +2099,7 @@ Proof.
   symmetry in vmineqvx0.
   generalize (vatlower _ x0interval vmineqvx0) as ax0pos. intros.
   inversion_clear ax0pos as [aminleax0 ax0leamax].
-  assume aminleaa. assume aalt0. fourier.
+  assume aminleaa. assume aalt0. lra.
 Qed.
 
 
@@ -2162,10 +2163,10 @@ Proof.
   apply (Rlt_irrefl 0). assumption.
   assumption.
 
-  assert (t1 <= t1 < t2) as t1interval. split; fourier.
+  assert (t1 <= t1 < t2) as t1interval. split; lra.
   assert (t1 <= x < t2) as xinterval.
   inversion tgtxgtt1.
-  split; fourier.
+  split; lra.
   generalize (pilot_model_accel_upto_limit_traj t1 t1interval r x xinterval x0pos) as vminbnd. intros.
 
   apply (Rplus_le_reg_r (- v t1)).
@@ -2190,7 +2191,7 @@ Proof.
   rename s into sold.
   inversion_clear sold as [s | s].
   apply below_vmin_lower_left_limiting_trajectory_upto_traj; try assumption.
-  assert (0<=(t-t1)) as tmt1ge0. fourier.
+  assert (0<=(t-t1)) as tmt1ge0. lra.
   inversion_clear tmt1ge0 as [tmt1gt0 | tmt1eq0].
   set (fll := (fct_cte (ab/2) * comp Rsqr (id - fct_cte t1) +
                fct_cte (v t1) * (id-fct_cte t1) + fct_cte (z t1))%F).
@@ -2198,11 +2199,11 @@ Proof.
   change (fll t <= z t).
   assume contz.
   apply limpoint; try assumption. (* clear H0. *)
-  exists t1. split. fourier. 
+  exists t1. split. lra. 
   intros.
   inversion_clear H0 as [t1ltx xltt].
   apply below_vmin_lower_left_limiting_trajectory_upto_traj; try assumption.
-  split. left. assumption. fourier. rewrite <- s. Radd t1. setl x. setr t. assumption.
+  split. left. assumption. lra. rewrite <- s. Radd t1. setl x. setr t. assumption.
   apply False_ind.
   rewrite s in tmt1eq0.
   assert (v t1 = vmin). Radd (- v t1).
@@ -2245,52 +2246,52 @@ Proof.
   assert ((vmin*vmin - (v t1)*(v t1))/(2*amin) + z t1 <= z ((vmin - v t1)/amin + t1)).
   assert (0 <= (vmin - v t1) / amin). inversion_clear r.
   setr ((v t1 - vmin) / (- amin)).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption.
   setr ((v t1 - vmin) * (/ -amin)).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption.
   assert (0 = 0*0). field. rewrite H0 at 1.
-  left. apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. fourier. fourier. 
-  apply Rinv_0_lt_compat. fourier.
+  left. apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. lra. lra. 
+  apply Rinv_0_lt_compat. lra.
   rewrite H. setr 0.
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption. right. reflexivity.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption. right. reflexivity.
   assert ((vmin - v t1) / amin + t1 - t1 <= (vmin - v t1) / amin). right. setl ((vmin - v t1) / amin).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption.
   reflexivity.
   assert (t1 <= (vmin - v t1) / amin + t1 < t2) as vmininterval.
   split. Radd (-t1). setl 0. setr ((vmin - v t1) / amin).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption. assumption.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption. assumption.
   assert ((vmin - v t1) / amin + t1 <= t). Radd (-t1). setl ((vmin - v t1) / amin).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption. assumption.
-  set (tmp := (vmin - v t1) / amin) in *. fourier.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption. assumption.
+  set (tmp := (vmin - v t1) / amin) in *. lra.
   
   generalize (above_vmin_lower_left_limiting_trajectory_traj ((vmin - v t1) / amin + t1) vmininterval
              zlet1 r H0). intros.
   setl (amin / 2 * ((vmin - v t1) / amin * ((vmin - v t1) / amin)) +
         v t1 * ((vmin - v t1) / amin) + z t1).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption.
   setl (amin / 2 *
        (((vmin - v t1) / amin + t1 - t1) *
         ((vmin - v t1) / amin + t1 - t1)) +
        v t1 * ((vmin - v t1) / amin + t1 - t1) + z t1).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption.
   assumption.
 
   setl (vmin * ( (t-t1) - ((vmin - v t1)/amin)) +
         (vmin * vmin - v t1 * v t1) / (2*amin) + z t1).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   set (tt := (vmin - v t1) / amin + t1).
   change ((vmin * vmin - v t1 * v t1) / (2 * amin) + z t1 <= z tt) in H.
   assert (tt <= t) as s1.
   unfold tt. Radd (-t1). setr (t-t1). setl ((vmin - v t1) / amin).
   intro. rewrite H0 in *.
-  assert (aa >= 0). fourier.
+  assert (aa >= 0). lra.
   apply (Rge_not_lt aa 0 H1 aalt00).
   assumption.
   apply (Rle_trans _ (vmin * (t - tt) + z tt) _).
   Radd (- vmin * (t - tt)). setr (z tt). unfold tt.
   setl ((vmin * vmin - v t1 * v t1) / (2 * amin) + z t1).
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   assumption.
 
@@ -2326,37 +2327,37 @@ Proof.
   rewrite fe, dpeqv.
   unfold f', fct_cte, mult_fct, plus_fct, id.
   assert (t1 <= t1 < t2) as t1interval. split. right. reflexivity. inversion tinterval.
-  inversion H0. fourier. rewrite <- H2 in H1. assumption.
+  inversion H0. lra. rewrite <- H2 in H1. assumption.
   eapply pilot_model_maintains_lower_bound_traj. apply t1interval. apply r.
   inversion ttltxltt as [ttltx xltt]. split.
   assert (t1 <= tt) as t1gett.
   unfold tt. Radd (-t1). setl 0. setr ((v t1 - vmin) * (/ -amin)).
-  intro. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption.
+  intro. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption.
   inversion_clear r. setl (0*0). left.
-  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. fourier. fourier. 
-  apply Rinv_0_lt_compat. fourier.
+  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. lra. lra. 
+  apply Rinv_0_lt_compat. lra.
   rewrite H0. setr 0.
-  intro. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption.
+  intro. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption.
   right. reflexivity.
 
-  fourier. fourier.
+  lra. lra.
   assert (t1 <= tt) as zlett. unfold tt.
   setr (  ((v t1 - vmin) * / - amin) + t1).
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   Radd (-t1). setl 0. setr ((v t1 - vmin) * / - amin).
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   inversion_clear r.
 
   left.
   assert (0 = 0*0). field. rewrite H1 at 1.
-  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. fourier. fourier.
-  apply Rinv_0_lt_compat. fourier.
+  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. lra. lra.
+  apply Rinv_0_lt_compat. lra.
   rewrite H0. setr 0.
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
-  right. reflexivity. inversion_clear ttltxltt. fourier.
+  right. reflexivity. inversion_clear ttltxltt. lra.
 Qed.
 
 
@@ -2389,32 +2390,32 @@ Proof.
   assert (0 <= (vmin - v t1) / ab).
   setr ((vmin - v t1) * / ab).
   intro. assume zltab. 
-  subst. assert (0 < 0). fourier.
+  subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   assert (0 = 0*0). field. rewrite H at 1. left.
-  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. fourier. fourier.
+  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. lra. lra.
   apply Rinv_0_lt_compat. apply zltab.
   assert ((vmin - v t1) / ab + t1 - t1 <= (vmin - v t1) / ab). right. setl ((vmin - v t1) / ab).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption.
   reflexivity.
   assert (t1 <= (vmin - v t1) / ab + t1 < t2) as vmininterval.
   split. Radd (-t1). setl 0. setr ((vmin - v t1) / ab).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption. assumption.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption. assumption.
   assert ((vmin - v t1) / ab + t1 <= t). Radd (-t1). setl ((vmin - v t1) / ab).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption. assumption.
-  set (tmp := (vmin - v t1) / ab) in *. inversion tinterval. fourier.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption. assumption.
+  set (tmp := (vmin - v t1) / ab) in *. inversion tinterval. lra.
 
   generalize (below_vmin_lower_left_limiting_trajectory_traj
                 ((vmin - v t1)/ab+t1) vmininterval zlet1 r H0). intros.
   setl (ab / 2 *
        (((vmin - v t1) / ab + t1 - t1) * ((vmin - v t1) / ab + t1 - t1)) +
        v t1 * ((vmin - v t1) / ab + t1 - t1) + z t1).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption. assumption.
 
   setl (vmin * ( (t-t1) - ((vmin - v t1)/ab)) +
         (vmin * vmin - v t1 * v t1) / (2*ab) + z t1).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   set (tt := (vmin - v t1) / ab + t1).
   change ((vmin * vmin - v t1 * v t1) / (2 * ab) + z t1 <=
@@ -2427,7 +2428,7 @@ Proof.
   apply (Rle_trans _ (vmin * (t - tt) + z tt) _).
   Radd (- vmin * (t - tt)). setr (z tt). unfold tt.
   setl ((vmin * vmin - v t1 * v t1) / (2 * ab) + z t1).
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   assumption.
 
@@ -2466,33 +2467,33 @@ Proof.
   split.
   unfold tt.
   setr ((vmin - v t1) * / ab).
-  intro. rewrite H0 in zltab0. assert (0 < 0). fourier.
+  intro. rewrite H0 in zltab0. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   assert (0 = 0*0). field. rewrite H0 at 1. 
-  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. fourier. fourier.
-  apply Rinv_0_lt_compat. fourier.
+  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. lra. lra.
+  apply Rinv_0_lt_compat. lra.
   Radd t1.
   setl tt. unfold tt. right. reflexivity.
   assert (ab * (tt - t1) + v t1 <= v tt) as vttval.
   Radd (- v t1). setl (ab * (tt - t1)). setr (v tt - v t1).
-  assert (t1 <= t1 < t2) as t1interval. inversion tinterval. split; fourier.
+  assert (t1 <= t1 < t2) as t1interval. inversion tinterval. split; lra.
   assert (t1 <= tt < t2) as ttinterval. split.
-  inversion ttpos. left. fourier. inversion ttltxltt. inversion tinterval. fourier.
+  inversion ttpos. left. lra. inversion ttltxltt. inversion tinterval. lra.
   apply (pilot_model_accel_upto_limit_traj t1 t1interval r tt ttinterval ttpos).
   unfold tt in vttval at 1.
   assert (ab * ((vmin - v t1) / ab + t1 - t1) + v t1 = vmin).
   field.
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   rewrite H0 in vttval.
   eapply pilot_model_maintains_lower_bound_traj.
   assert (t1 <= tt < t2) as ttinterval. split.
-  inversion ttpos. left. fourier. inversion ttltxltt. inversion tinterval. fourier.
+  inversion ttpos. left. lra. inversion ttltxltt. inversion tinterval. lra.
   eapply ttinterval.
   apply vttval.
   inversion_clear ttltxltt. split.
-  inversion ttpos. fourier.
-  inversion ttlexlet. inversion tinterval. fourier.
+  inversion ttpos. lra.
+  inversion ttlexlet. inversion tinterval. lra.
   inversion ttltxltt.
   assumption.
 Qed.
@@ -2551,14 +2552,14 @@ Proof.
   setl (amin / 2 * ((t-t1) * (t-t1)) + v t1 * (t-t1) + z t1).
   apply above_vmin_lower_left_limiting_trajectory_traj; try assumption.
   setl (vmin * (t-t1) - (vmin - v t1) / amin * (vmin - v t1) / 2 + z t1).
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   apply above_vmin_lower_right_limiting_trajectory_traj; try assumption.
   left. assumption.
   setl (ab / 2 * ((t-t1) * (t-t1)) + v t1 * (t-t1) + z t1).
   apply below_vmin_lower_left_limiting_trajectory_traj; try assumption.
   setl (vmin * (t-t1) - (vmin - v t1) / ab * (vmin - v t1) / 2 + z t1).
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   apply below_vmin_lower_right_limiting_trajectory_traj; try assumption.
   left. assumption.
@@ -2641,8 +2642,8 @@ Proof.
   rewrite dpeqv in contv0.
   inversion_clear H0 as [zltx0 x0ltx].
   
-  assert (t1 <= t1 < t2) as t1interval. inversion tinterval. split; fourier.
-  assert (t1 <= x0 < t2) as x0interval. inversion tinterval. inversion tgtxgt0; split; fourier.
+  assert (t1 <= t1 < t2) as t1interval. inversion tinterval. split; lra.
+  assert (t1 <= x0 < t2) as x0interval. inversion tinterval. inversion tgtxgt0; split; lra.
   generalize (pilot_model_maintains_upper_bound_traj t1 t1interval r x0 x0interval zltx0) as vmaxbnd. intros.
 
   inversion_clear vmaxbnd as [vmaxltvx0 | vmaxeqvx0].
@@ -2662,7 +2663,7 @@ Proof.
 
   generalize (vatupper _ x0interval vmaxeqvx0) as ax0pos. intros.
   inversion_clear ax0pos as [amaxleax0 ax0leamax].
-  assume ableamax. assume zltab. fourier.
+  assume ableamax. assume zltab. lra.
 Qed.
 
 Lemma above_vmax_upper_left_limiting_trajectory_upto :
@@ -2717,14 +2718,14 @@ Proof.
   clear pfun.
   rewrite dpeqv in contv0.
   assert (0 < x - t1 <= (vmax - v t1) / aa) as x0pos.
-  split. inversion_clear tgtxgt0 as [zltx xltt]. fourier.
+  split. inversion_clear tgtxgt0 as [zltx xltt]. lra.
   left. inversion_clear tgtxgt0 as [zltx xltt].
-  apply (Rlt_trans _ (t-t1) _). fourier. assumption.
-  assert (t1 <= t1 < t2) as t1interval. inversion tinterval. split; fourier.
-  assert (t1 <= x < t2) as xinterval. inversion tinterval. inversion tgtxgt0; split; fourier.
+  apply (Rlt_trans _ (t-t1) _). lra. assumption.
+  assert (t1 <= t1 < t2) as t1interval. inversion tinterval. split; lra.
+  assert (t1 <= x < t2) as xinterval. inversion tinterval. inversion tgtxgt0; split; lra.
   generalize (pilot_model_accel_downto_limit_traj t1 t1interval r x xinterval x0pos) as vmaxbnd. intros.
 
-  fourier.
+  lra.
 Qed.
 
 Lemma above_vmax_upper_left_limiting_trajectory :
@@ -2755,11 +2756,11 @@ Proof.
   inversion xinterval as [t1ltx xltt].
 
   apply above_vmax_upper_left_limiting_trajectory_upto_traj; try assumption.
-  split; fourier.
+  split; lra.
   Radd t1. setl x.
   assert (t = (vmax - v t1) / aa + t1) as tdef.
   Radd (-t1). setl (t - t1). setr ((vmax - v t1) / aa).
-  intro. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption. assumption.
+  intro. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption. assumption.
   rewrite <- tdef. assumption.
 
   apply False_ind.
@@ -2804,46 +2805,46 @@ Proof.
   assert (z ((vmax - v t1)/amax + t1) <= (vmax*vmax - (v t1)*(v t1))/(2*amax) + z t1).
   assert (0 <= (vmax - v t1) / amax). inversion_clear r.
   left. setr ((vmax - v t1) * (/ amax)).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   assert (0 = 0*0). field. rewrite H0 at 1.
-  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. fourier. fourier.
-  apply Rinv_0_lt_compat. fourier.
+  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. lra. lra.
+  apply Rinv_0_lt_compat. lra.
   rewrite H. setr 0.
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption. right. reflexivity.
   assert ((vmax - v t1) / amax + t1 - t1 <= (vmax - v t1) / amax).
   setl ((vmax - v t1) / amax).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption. 
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption. 
   right. reflexivity.
 
   assert (t1 <= (vmax - v t1) / amax + t1 < t2) as vmaxinterval.
   split. Radd (-t1). setl 0. setr ((vmax - v t1) / amax).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption. assumption.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption. assumption.
   assert ((vmax - v t1) / amax + t1 <= t). Radd (-t1). setl ((vmax - v t1) / amax).
-  intro. subst. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption. assumption.
-  set (tmp := (vmax - v t1) / amax) in *. inversion tinterval. fourier.
+  intro. subst. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption. assumption.
+  set (tmp := (vmax - v t1) / amax) in *. inversion tinterval. lra.
 
   generalize (below_vmax_upper_left_limiting_trajectory_traj
                 ((vmax - v t1)/amax + t1) vmaxinterval zlet1 r H0). intros.
   setr (amax / 2 * (((vmax - v t1) / amax + t1 - t1) * ((vmax - v t1) / amax + t1 - t1)) +
         v t1 * ((vmax - v t1) / amax + t1 - t1) + z t1).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption. assumption.
 
   setr (vmax * ( (t-t1) - ((vmax - v t1)/amax)) +
         (vmax * vmax - v t1 * v t1) / (2*amax) + z t1).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   set (tt := (vmax - v t1) / amax + t1).
   change (z tt <=
           (vmax * vmax - v t1 * v t1) / (2 * amax) + z t1) in H.
   assert (tt <= t) as s1. unfold tt. Radd (-t1). setr (t-t1). setl ((vmax - v t1) / amax).
-  intro. rewrite H0 in ableamax0. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption. assumption.
+  intro. rewrite H0 in ableamax0. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption. assumption.
   Radd (- vmax * (t - tt)).
   setl (z t - vmax * (t - tt)). unfold tt at 2.
   setr ((vmax * vmax - v t1 * v t1) / (2 * amax) + z t1).
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   apply (Rle_trans _ (z tt) _).
 
@@ -2882,16 +2883,16 @@ Proof.
 
   left.
   setr ((vmax - v t1) / amax).
-  intro. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption.
+  intro. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption.
   assert (0 = 0*0). field. rewrite H1 at 1.
-  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. fourier. fourier.
-  apply Rinv_0_lt_compat. fourier.
+  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. lra. lra.
+  apply Rinv_0_lt_compat. lra.
   rewrite H0. setr 0.
-  intro. assert (0 < 0). fourier. apply (Rlt_irrefl 0). assumption.
+  intro. assert (0 < 0). lra. apply (Rlt_irrefl 0). assumption.
   right. reflexivity. 
 
-  assert (t1 <= t1 < t2) as t1interval. inversion tinterval. split; fourier.
-  assert (t1 <= x < t2) as xinterval. inversion tinterval. inversion ttltxltt. split; fourier.
+  assert (t1 <= t1 < t2) as t1interval. inversion tinterval. split; lra.
+  assert (t1 <= x < t2) as xinterval. inversion tinterval. inversion ttltxltt. split; lra.
   inversion xinterval. inversion H0.
   eapply pilot_model_maintains_upper_bound_traj. apply t1interval. apply r. apply xinterval. assumption.
   rewrite <- H2. assumption.
@@ -2924,47 +2925,47 @@ Proof.
   assert (z ((vmax - v t1)/aa + t1) <= (vmax*vmax - (v t1)*(v t1))/(2*aa) + z t1).
   assert (0 <= (vmax - v t1) / aa).
   setr ((v t1 - vmax) * / - aa).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   assert (0 = 0*0). field. rewrite H at 1. left.
-  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. fourier. fourier.
-  apply Rinv_0_lt_compat. fourier.
+  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. lra. lra.
+  apply Rinv_0_lt_compat. lra.
   assert ((vmax - v t1) / aa + t1 -t1 <= (vmax - v t1) / aa).
   setl ((vmax - v t1) / aa).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   right. reflexivity.
   assert (t1 <= (vmax - v t1) / aa + t1 < t2) as vmaxinterval.
   split. Radd (-t1). setl 0. setr ((vmax - v t1) / aa).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption. assumption.
   inversion s as [vmaxlttmt1 | vmaxeqtmt1].
   inversion tinterval. apply (Rlt_trans _ t  _).
   Radd (-t1). setr (t-t1). setl ((vmax - v t1) / aa).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption. assumption. assumption.
   rewrite vmaxeqtmt1. setl t. inversion tinterval. assumption.
   generalize (above_vmax_upper_left_limiting_trajectory_traj
                 ((vmax - v t1)/aa + t1) vmaxinterval zlet1 r H0). intros.
   setr (aa / 2 * (((vmax - v t1) / aa + t1 - t1) * ((vmax - v t1) / aa + t1 - t1)) +
         v t1 * ((vmax - v t1) / aa + t1 - t1) + z t1).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption. assumption.
 
   setr (vmax * ( (t-t1) - ((vmax - v t1)/aa)) +
         (vmax * vmax - v t1 * v t1) / (2*aa) + z t1).
-  intro. subst. assert (0 < 0). fourier.
+  intro. subst. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   set (tt := (vmax - v t1) / aa + t1).
   change (z tt <= 
           (vmax * vmax - v t1 * v t1) / (2 * aa) + z t1) in H.
   assert (tt <= t) as s1.
   unfold tt. Radd (-t1). setr (t-t1). setl ((vmax - v t1) / aa).
-  intro. rewrite H0 in aalt00. assert (0 < 0). fourier.
+  intro. rewrite H0 in aalt00. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption. assumption.
   Radd (- vmax * (t - tt)). unfold tt at 2.
   setr ((vmax * vmax - v t1 * v t1) / (2 * aa) + z t1).
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   setl (z t - vmax * (t - tt)).
   apply (Rle_trans _ (z tt) _).
@@ -3004,32 +3005,32 @@ Proof.
   split.
   unfold tt.
   setr ((v t1 - vmax ) * / - aa).
-  intro. rewrite H0 in aalt00. assert (0 < 0). fourier.
+  intro. rewrite H0 in aalt00. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   assert (0 = 0*0). field. rewrite H0 at 1. 
-  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. fourier. fourier.
-  apply Rinv_0_lt_compat. fourier.
+  apply Rmult_ge_0_gt_0_lt_compat. right. reflexivity. lra. lra.
+  apply Rinv_0_lt_compat. lra.
   Radd t1.
   setl tt. unfold tt. right. reflexivity.
 
   assert ( v tt <= aa * (tt - t1) + v t1) as vttval.
   Radd (- v t1). setr (aa * (tt - t1)). setl (v tt - v t1).
-  assert (t1 <= t1 < t2) as t1interval. inversion tinterval. split; fourier.
+  assert (t1 <= t1 < t2) as t1interval. inversion tinterval. split; lra.
   assert (t1 <= tt < t2) as ttinterval. split.
-  inversion ttpos. left. fourier. inversion ttltxltt. inversion tinterval. fourier.
+  inversion ttpos. left. lra. inversion ttltxltt. inversion tinterval. lra.
 
   apply (pilot_model_accel_downto_limit_traj t1 t1interval r tt ttinterval ttpos).
   
   assert (aa * ((vmax - v t1) / aa + t1 - t1) + v t1 = vmax).
   field.
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   change (aa * (tt - t1) + v t1 = vmax) in H0.
   rewrite H0 in vttval.
 
-  assert (t1 <= tt < t2) as ttinterval. inversion ttpos. inversion tinterval. split; fourier.
+  assert (t1 <= tt < t2) as ttinterval. inversion ttpos. inversion tinterval. split; lra.
   assert (t1 <= x < t2) as xinterval. inversion tinterval. inversion ttltxltt. inversion ttpos.
-  split; fourier.
+  split; lra.
   inversion xinterval.
   eapply pilot_model_maintains_upper_bound_traj. apply ttinterval. assumption. apply xinterval.
   inversion_clear ttltxltt. assumption.
@@ -3094,10 +3095,10 @@ Proof.
   apply above_vmax_upper_left_limiting_trajectory_traj; try assumption.
   assert (t-t1 <= 0) as tle0. rewrite r in s0.
   setr ((v t1 - v t1)/aa).
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption. assumption.
 
-  assert (0 <= t-t1) as zletmt1. inversion tinterval. fourier.
+  assert (0 <= t-t1) as zletmt1. inversion tinterval. lra.
   inversion tle0 as [tlt0 | teq0]. apply False_ind.
   eapply Rge_not_lt. apply Rle_ge. apply zletmt1. assumption.
   rewrite teq0. setr (z t1).
@@ -3106,7 +3107,7 @@ Proof.
   right. reflexivity.
 
   setr (vmax * (t-t1) - (vmax - v t1) / aa * (vmax - v t1) / 2 + z t1).
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   rename r into vmpos.
   inversion_clear vmpos as [r|r].
@@ -3119,10 +3120,10 @@ Proof.
   assert (v t1 <= vmax) as v0levm. right. symmetry. assumption.
   assert ((vmax - v t1)/amax <= t-t1) as tgett. left. rewrite zer in *.
   setl 0.
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   assert (0 / aa = 0) as zltaa. field.
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   rewrite zltaa in r0. assumption.
 
@@ -3131,12 +3132,12 @@ Proof.
   rewrite zer in *.
   fieldrewrite (vmax * (t-t1) - 0 / aa * 0 / 2 + z t1)
                (vmax * (t-t1) + z t1).
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
 
   assert (vmax * (t-t1) - 0 / amax * 0 / 2 + z t1 = vmax * (t-t1) + z t1) as bndeq.
   field.
-  intro. assert (0 < 0). fourier.
+  intro. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   rewrite bndeq in bnd. assumption.
 
@@ -3144,7 +3145,7 @@ Proof.
   apply below_vmax_upper_left_limiting_trajectory_traj; try assumption.
   left. assumption.
   setr (vmax * (t-t1) - (vmax - v t1) / amax * (vmax - v t1) / 2 + z t1).
-  intro. rewrite H in ableamax0. assert (0 < 0). fourier.
+  intro. rewrite H in ableamax0. assert (0 < 0). lra.
   apply (Rlt_irrefl 0). assumption.
   apply below_vmax_upper_right_limiting_trajectory_traj; try assumption.
   left. assumption.
@@ -3259,37 +3260,37 @@ Proof.
   apply (SafeFlt_ind zo vo ao zi vi ai P).
 
   (* inductive step Pi->Pi+1 *)
-  intros until 0. intros Mo Mi vs Ft2 Pt2. unfold P in *.
+  intros *. intros Mo Mi vs Ft2 Pt2. unfold P in *.
   inversion Mo. clear vabove vatupper vwithin vatlower vbelow.
   intros t zlet1 tinterval.
   unfold Rmax, Rmin in *.
   destruct (Rle_dec t1 tb).
   destruct (Rle_dec t2 tb).
-  assert (0 <= t2) as zlet2. fourier.
+  assert (0 <= t2) as zlet2. lra.
   apply (Pt2 t zlet2 tinterval).
   generalize (Rnot_le_gt _ _ n) as tbltt2; intros; clear n.
   apply Rgt_lt in tbltt2.
   generalize (Rtotal_order t t2) as trelt2'. intros.
   inversion trelt2' as [trelt2 | trelt2]; clear trelt2'.
   (****** use Φ **********************)
-  assert (tb <= t <= t2) as tsubinterval. inversion tinterval. split; fourier.
-  assert (t1 <= t < t2) as tmaneuver. inversion tinterval. split; fourier.
+  assert (tb <= t <= t2) as tsubinterval. inversion tinterval. split; lra.
+  assert (t1 <= t < t2) as tmaneuver. inversion tinterval. split; lra.
   destruct (Rle_dec (0 - t1) (tb - t1)).
   destruct (Rle_dec (t2 - t1) (te - t1)).
   apply (safely_above_for_1_maneuver Po Mo Pi Mi zlet1 tmaneuver tsubinterval vs).
   apply (safely_above_for_1_maneuver Po Mo Pi Mi zlet1 tmaneuver tinterval vs).
   apply False_ind.
-  apply n. Radd t1. setl 0. setr tb. fourier.
+  apply n. Radd t1. setl 0. setr tb. lra.
   (****************************)
   assert (t2 <= t <= te) as tsubinterval. inversion tinterval.
-  split. inversion trelt2. rewrite H1. right. reflexivity. left. fourier. assumption.
-  clear trelt2. assert (0 <= t2) as zlet2. fourier.
+  split. inversion trelt2. rewrite H1. right. reflexivity. left. lra. assumption.
+  clear trelt2. assert (0 <= t2) as zlet2. lra.
   apply (Pt2 t zlet2 tsubinterval).
 
   destruct (Rle_dec t2 tb).
   generalize (Rnot_le_gt _ _ n) as tbltt1; intros; clear n.
   apply Rgt_lt in tbltt1.
-  assert (t1>t2). fourier.
+  assert (t1>t2). lra.
   generalize (Rgt_not_le _ _ H).
   intro. apply False_ind. apply H0. assumption.
   generalize (Rnot_le_gt _ _ n) as tbltt1; intros; clear n.
@@ -3300,11 +3301,11 @@ Proof.
   generalize (Rtotal_order t t2) as trelt2'. intros.
   inversion trelt2' as [trelt2 | trelt2]; clear trelt2'.
   (****** use Φ **********************)
-  assert (tb <= t <= t2) as tsubinterval. inversion tinterval. split; fourier.
-  assert (tb <= t <= te) as tsubinterval2. inversion tinterval. split; fourier.
-  assert (t1 <= t < t2) as tmaneuver. inversion tinterval. split; fourier.
-  assert (0 <= t <= t2) as tsubinterval3. inversion tinterval. split; fourier.
-  assert (0 <= t <= te) as tsubinterval4. inversion tinterval. split; fourier.
+  assert (tb <= t <= t2) as tsubinterval. inversion tinterval. split; lra.
+  assert (tb <= t <= te) as tsubinterval2. inversion tinterval. split; lra.
+  assert (t1 <= t < t2) as tmaneuver. inversion tinterval. split; lra.
+  assert (0 <= t <= t2) as tsubinterval3. inversion tinterval. split; lra.
+  assert (0 <= t <= te) as tsubinterval4. inversion tinterval. split; lra.
   destruct (Rle_dec (0 - t1) (tb - t1)).
   destruct (Rle_dec (t2 - t1) (te - t1)).
   
@@ -3315,37 +3316,37 @@ Proof.
   apply (safely_above_for_1_maneuver Po Mo Pi Mi zlet1 tmaneuver tsubinterval4 vs).
   (****************************)
   assert (t2 <= t <= te) as tsubinterval. inversion tinterval.
-  split. inversion trelt2. rewrite H1. right. reflexivity. left. fourier. assumption.
-  clear trelt2. assert (0 <= t2) as zlet2. fourier.
+  split. inversion trelt2. rewrite H1. right. reflexivity. left. lra. assumption.
+  clear trelt2. assert (0 <= t2) as zlet2. lra.
   apply (Pt2 t zlet2 tsubinterval).
 
   (* base case P0 *)
-  intros until 0. intros Mo Mi vs.
+  intros *. intros Mo Mi vs.
   unfold Poly.
   intros t zlet1 tinterval.
   unfold Rmax in *.
   destruct (Rle_dec t1 tb).
-  assert (t1 <= t < te+1) as tsubinterval. inversion tinterval. split; fourier.
+  assert (t1 <= t < te+1) as tsubinterval. inversion tinterval. split; lra.
   inversion_clear Mo. generalize (mnv (te+1)) as mnv'; clear mnv; intro.
   inversion_clear Mi. generalize (mnv (te+1)) as mnv0'; clear mnv; intro.
   destruct (Rle_dec (0-t1) (tb-t1)). clear r0.
   apply (safely_above_for_1_maneuver Po mnv' Pi mnv0' zlet1 tsubinterval tinterval vs).
-  assert (0 <= t <= te) as tinterval2. inversion tinterval. split; fourier.
+  assert (0 <= t <= te) as tinterval2. inversion tinterval. split; lra.
   apply (safely_above_for_1_maneuver Po mnv' Pi mnv0' zlet1 tsubinterval tinterval2 vs).
   
   generalize (Rnot_le_gt _ _ n) as tbltt1; intros; clear n.
   apply Rgt_lt in tbltt1.
   destruct (Rle_dec (0-t1) (tb-t1)).
 
-  assert (0 <= tb) as t1letb. fourier. clear r.
-  assert (tb <= t <= te) as tsubinterval4. inversion tinterval. split; fourier.
-  assert (t1 <= t < (te+1)) as tsubinterval5. inversion tinterval. split; fourier.
+  assert (0 <= tb) as t1letb. lra. clear r.
+  assert (tb <= t <= te) as tsubinterval4. inversion tinterval. split; lra.
+  assert (t1 <= t < (te+1)) as tsubinterval5. inversion tinterval. split; lra.
   inversion_clear Mo. generalize (mnv (te+1)) as mnv'; clear mnv; intro.
   inversion_clear Mi. generalize (mnv (te+1)) as mnv0'; clear mnv; intro.
   apply (safely_above_for_1_maneuver Po mnv' Pi mnv0' zlet1 tsubinterval5 tsubinterval4 vs).
 
-  assert (0 <= t <= te) as tsubinterval4. inversion tinterval. split; fourier.
-  assert (t1 <= t < (te+1)) as tsubinterval5. inversion tinterval. split; fourier.
+  assert (0 <= t <= te) as tsubinterval4. inversion tinterval. split; lra.
+  assert (t1 <= t < (te+1)) as tsubinterval5. inversion tinterval. split; lra.
   inversion_clear Mo. generalize (mnv (te+1)) as mnv'; clear mnv; intro.
   inversion_clear Mi. generalize (mnv (te+1)) as mnv0'; clear mnv; intro.
   apply (safely_above_for_1_maneuver Po mnv' Pi mnv0' zlet1 tsubinterval5 tsubinterval4 vs).
@@ -3387,23 +3388,23 @@ Proof.
   inversion_clear F.
   generalize (safely_above_for_m_maneuvers t1 tb te vmd Po Pi
                                            H t t1ge0 thconflict).
-  intros. assert (zo t > zi t) as order. fourier.
+  intros. assert (zo t > zi t) as order. lra.
   unfold Rabs.
   destruct (Rcase_abs (zo t - zi t)).
   apply False_ind.
-  assert (zo t <= zi t). fourier.
+  assert (zo t <= zi t). lra.
   eapply Rlt_not_le. apply order. assumption.
   assumption.
 
   generalize (safely_above_for_m_maneuvers t1 tb te vmd Pi Po
                                            H t t1ge0 thconflict).
-  intros. assert (zo t < zi t) as order. fourier.
+  intros. assert (zo t < zi t) as order. lra.
   unfold Rabs.
   destruct (Rcase_abs (zo t - zi t)).
   setr (zi t - zo t).
   assumption.
   apply False_ind.
-  assert (zi t <= zo t). fourier.
+  assert (zi t <= zo t). lra.
   eapply Rlt_not_le. apply order. assumption.
 Qed.
 
@@ -3418,6 +3419,9 @@ hp during the horizontal conflict intervals guaranteeing no collisions.
 *)
 
 Record CI  := { tb:R; te:R; zi:R->R; vi:R->R; ai:R->R; Pi:Path zi vi ai}.
+
+(* Ψ constrains Po through a sequence of maneuvers, 
+each of which have acceleration bounds and velocity targets, and dynamics *)
 
 Inductive Ψ {zo vo ao } t1 vmd
           (Po: Path zo vo ao) : list CI -> Prop :=
@@ -3445,7 +3449,7 @@ Theorem safely_separated_vertical_trajectories:
     Ψ t1 vmd Po cilst ->
     SeparateMulti t1 vmd Po cilst.
 Proof.
-  intros until 0. intros hppos t1pos sfm.
+  intros *. intros hppos t1pos sfm.
   induction cilst.
   apply smtrj_null.
   inversion_clear sfm. 

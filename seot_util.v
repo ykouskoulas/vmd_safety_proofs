@@ -1,7 +1,7 @@
 Require Import Reals.
 Require Import Coq.Reals.Rdefinitions. 
 Require Import Coq.Logic.FunctionalExtensionality.
-Require Import Fourier.
+Require Import Lra.
 Local Open Scope R_scope.
 
 
