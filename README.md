@@ -1,25 +1,29 @@
 # Controller synthesis for guaranteed-safe collision avoidance maneuvers
 
-This repository contains a peer-reviewed publication describing a
-framework for adaptive-control collision-avoidance that is synthesized
-using plug-in safety predicates for each available maneuver. The
-controller derives safety and correctness guarantees from the
-properties of the safety predicates that are plugged into it. 
+## What is this?
 
-It is titled
+This repository contains a peer-reviewed publication describing an
+adaptive controller for collision-avoidance that is synthesized using
+plug-in safety guarantees for each available maneuver. The controller
+derives guarantees of safety and correctness partly from the
+properties of the associated with maneuvers that are plugged into it.
+
+## Documentation
+
+The paper is titled
 
 *"Provably Safe Controller Synthesis Using Safety Proofs as Building
 Blocks"*
 
-presented at the 7th international conference in Software Engineering
-Research and Innovation in 2019. It describes a controller that can
-safely, adaptively switch between collision-avoidance maneuvers and is
-guaranteed to be safe if the maneuvers themselves have certain safety
-guarantees. The paper provides pseudocode for the controller
-framework, a manual by-hand proof of safety for the system, and to
-demonstrate the feasibility of the synthesis provides example safety
-predicates with machine-checked proofs of safety and correctness for
-vertical aircraft collision avoidance maneuvers.
+and was presented at the 7th international conference in Software
+Engineering Research and Innovation in 2019. It describes a controller
+that can safely, adaptively switch between collision-avoidance
+maneuvers and is guaranteed to be safe if the maneuvers themselves
+have certain safety guarantees. The paper provides pseudocode and an
+informal proof of correctness for the controller, and provides example
+safety guarantees with machine-checked proofs of safety and
+correctness for vertical aircraft collision avoidance maneuvers from
+prior work.
 
 Abstract:
 
@@ -53,3 +57,11 @@ coqc analysis.v
 coqc vmd.v
 $
 ```
+
+## About me
+
+Work/projects: https://www.linkedin.com/in/ykouskoulas
+
+Publications:  https://orcid.org/0000-0001-7347-7473
+
+This repo:     https://github.com/ykouskoulas/vmd_safety_proofs
